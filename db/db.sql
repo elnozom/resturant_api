@@ -384,3 +384,99 @@ END
 
 
 
+
+GO
+--reset the orders tables
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Reset]
+AS
+BEGIN
+
+	TRUNCATE TABLE StkTr03;
+	TRUNCATE TABLE StkTr04;
+	UPDATE Tables Set pause = 0 , State = 'Free'
+END
+
+
+
+
+
+
+GO
+--insert modifers into stktr04 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[Stktr04InsertModifiers] 
+(@ItemsSerials nvarchar(100) ,@HeadSerial int,@OriginalItemSerial  int) 
+	as
+	BEGIN  
+	SET NOCOUNT ON;
+	DECLARE @OrderType int
+	declare @ItemPosi int 
+	declare  @Qnt real
+	declare @Price money 
+	declare @MenuSerial int 
+	declare  @ModifierSerial int 
+--	declare @ID nvarchar(20)
+	
+	declare I_Serial cursor
+	for
+	SELECT Split.a.value('.', 'NVARCHAR(MAX)') DATA
+    FROM
+	  (
+		 SELECT CAST('<X>'+REPLACE(@ItemsSerials, ',', '</X><X>')+'</X>' AS XML) AS String
+       ) AS A
+		CROSS APPLY String.nodes('/X') AS Split(a)
+		
+		open I_Serial
+		Fetch Next From I_Serial into
+		 @ModifierSerial 
+	while @@FETCH_STATUS = 0
+	begin 
+	SELECT @OrderType = OrderType FROM StkTr03 WHERE Serial = @HeadSerial
+		SELECT @MenuSerial = Serial from Menus 
+		where 
+		IsTakeWay = case when @Ordertype = 0 then  1 else null end 
+		or  
+		IsTS = case when @OrderType  = 2 then   1 else null end 
+		or 
+		IsDelivery = Case when @OrderType = 1 then  1 else null end 
+
+	SELECT @ItemPosi = ISNULL(ItemPosi ,0 ) + 1 from StkTr04 where HeadSerial  = @HeadSerial 
+	--SELECT @Price = ItemPrice FROM ItemMenuMap WHERE ItemSerial = @ModifierSerial AND MnuSerial = @MenuSerial
+	INSERT INTO StkTr04 (
+		HeadSerial ,
+		ItemSerial,
+		WithMod ,
+		Price,
+		Qnt,
+		IsMod,
+		ItemPosi,
+		MainModSerial
+
+	) VALUES (
+		@HeadSerial ,
+		@ModifierSerial,
+		0,
+		0,
+		1,
+		1,
+		@ItemPosi,
+		@OriginalItemSerial
+	)
+        
+
+		Fetch Next From I_Serial into
+		 @ModifierSerial 
+	end 
+		Close I_Serial
+		DEALLOCATE   I_Serial
+
+		SELECT 1 Inserted
+	end 

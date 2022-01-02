@@ -16,3 +16,9 @@ type InsertItemReq struct {
 	IsMod      bool
 	Qnt        int
 }
+
+type InsertItemWithModifiersReq struct {
+	ItemsSerials       string
+	HeadSerial         int
+	OriginalItemSerial int
+}

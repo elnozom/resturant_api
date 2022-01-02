@@ -34,8 +34,22 @@ func (h *Handler) OrderItemInsert(c echo.Context) error {
 }
 
 func (h *Handler) OrderItemDelete(c echo.Context) error {
+
 	var resp bool
 	err := h.db.Raw("EXEC StkTr04Delete	@Serial = ?", c.Param("serial")).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) OrderItemInsertWithModifiers(c echo.Context) error {
+	req := new(model.InsertItemWithModifiersReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	var resp bool
+	err := h.db.Raw("EXEC Stktr04InsertModifiers @ItemsSerials = ? , @HeadSerial = ? , @OriginalItemSerial = ?", req.ItemsSerials, req.HeadSerial, req.OriginalItemSerial).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
