@@ -480,3 +480,25 @@ CREATE PROCEDURE [dbo].[Stktr04InsertModifiers]
 
 		SELECT 1 Inserted
 	end 
+
+
+
+
+
+
+
+
+
+GO
+-- list order and items by item serial
+-- i refers to item , oi refers to orderItem
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
+AS
+BEGIN
+	SELECT DocDate , DocNo , WaiterCode FROM StkTr03 WHERE Serial = @Serial
+	SELECT oi.Serial tr04Serial , Qnt , Price , ItemSerial , i.ItemName FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial AND oi.IsMod = 0
+END

@@ -7,3 +7,9 @@ type Order struct {
 	OrderType   int
 	WaiterCode  int
 }
+
+type OrderResp struct {
+	DocDate    string
+	DocNo      string
+	WaiterCode int
+}

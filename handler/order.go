@@ -55,3 +55,16 @@ func (h *Handler) OrderItemInsertWithModifiers(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, resp)
 }
+
+func (h *Handler) OrderListItemsBySerial(c echo.Context) error {
+	req := new(model.InsertItemWithModifiersReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	var orderResp model.OrderResp
+	err := h.db.Raw("EXEC StkTr03ListItemsBySerial @Serial = ? ", c.Param("serial")).Row().Scan(&orderResp.DocDate, &orderResp.DocNo, &orderResp.WaiterCode)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, orderResp)
+}
