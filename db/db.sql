@@ -5,7 +5,7 @@
 	-- EmployeeGetByCode(@EmpCode int) :{Employee} [EmpName, EmpPassword , EmpCode]
 	--tables--
 	-- GroupTablesList :{GroupTables} [ GroupTableNo , GroupTableName , TableCount ]
-	-- TablesListByGroupNo(@GroupTableNo int) :{Tables} [TableNo , TableName , "pause" , isnull(OpenDateTime , '' )]
+	-- TablesListByGroupNo(@GroupTableNo int) :{Tables} [TableNo , TableName , "pause" , ISNULL(OpenDateTime , '' )]
 	--groups--
 	-- GroupTypeList :{GroupType} [GroupTypeID , GroupTypeName]
 	-- GroupCodeListByGroupTypeId(@GroupTypeID int) :{GroupCode}	[g.GroupCode , g.GroupName ]
@@ -41,17 +41,15 @@ END
 
 
 GO
-CREATE PROCEDURE TablesListByGroupNo(@GroupTableNo int)
+CREATE PROCEDURE [dbo].[TablesListByGroupNo](@GroupTableNo int)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
-
-
-	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" , StkTr03.PrintTimes , isnull(OpenDateTime , '' ) FROM  "Tables" LEFT JOIN StkTr03 ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 WHERE Tables.GroupTableNo = @GroupTableNo
+	DECLARE @TotalCash FLOAT
+	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" , ISNULL(StkTr03.PrintTimes , 0) PrintTimes , ISNULL(convert(char(5), DocDate, 108) , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo , ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) , ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) TotalCash  FROM  "Tables" LEFT JOIN StkTr03 ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 WHERE Tables.GroupTableNo = @GroupTableNo
 END
-
 
 GO
 -- list all main groups
@@ -145,8 +143,8 @@ CREATE  PROCEDURE  [dbo].[Stktr03Insert] (@TableNo int, @GroupTableNo int,@Imei 
    WHERE ComUse.Imei = @Imei and CashTry.CloseDate is null and Paused = 0
 
 
-	SELECT @OrderNo = isnull( MAX(OrderNo),0) + 1 FROM StkTr03
-	SELECT  @BonNo =  isnull (MAX(BonNo),0) + 1 FROM StkTr03 WHERE CashTrySerial = @CashSerial
+	SELECT @OrderNo = ISNULL( MAX(OrderNo),0) + 1 FROM StkTr03
+	SELECT  @BonNo =  ISNULL (MAX(BonNo),0) + 1 FROM StkTr03 WHERE CashTrySerial = @CashSerial
 
 
 
@@ -499,6 +497,5 @@ GO
 CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
 AS
 BEGIN
-	SELECT DocDate , DocNo , WaiterCode FROM StkTr03 WHERE Serial = @Serial
-	SELECT oi.Serial tr04Serial , Qnt , Price , ItemSerial , i.ItemName FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial AND oi.IsMod = 0
+	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod , Price,0)ItemPrice , ItemSerial , i.ItemName ,oi.IsMod FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
 END

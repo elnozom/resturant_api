@@ -30,4 +30,9 @@ type Table struct {
 	PrintTimes   int
 	Status       string
 	OpenDateTime string
+	DocNo        string
+	HeadSerial   int
+	Guests       int
+	WaiterCode   int
+	TotalCash    float64
 }

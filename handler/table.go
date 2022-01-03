@@ -41,20 +41,19 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var table model.Table
-		err = rows.Scan(&table.Serial, &table.TableNo, &table.TableName, &table.Pause, &table.State, &table.PrintTimes, &table.OpenDateTime)
+		var prependedString string
+		err = rows.Scan(&table.Serial, &table.TableNo, &table.TableName, &table.Pause, &table.State, &table.PrintTimes, &table.OpenDateTime, &table.DocNo, &table.HeadSerial, &table.WaiterCode, &table.TotalCash)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
-		if table.State == "Free" {
-			table.Status = table.State
-		} else {
-			if table.PrintTimes > 0 {
-				// table.Status = table.State + "with_chque" + "printed : " + table.PrintTimes
-				table.Status = fmt.Sprintf("%s_with_cheque", table.State)
-			} else {
-				table.Status = fmt.Sprintf("%s_without_cheque", table.State)
-			}
+		if table.State != "Free" && table.PrintTimes > 0 {
+			prependedString = "_with_cheque"
 		}
+		if table.State != "Free" && table.PrintTimes == 0 {
+			prependedString = "_without_cheque"
+		}
+		table.Status = fmt.Sprintf("%s%s", table.State, prependedString)
+
 		tables = append(tables, table)
 	}
 

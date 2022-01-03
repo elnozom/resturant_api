@@ -26,7 +26,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 
 	// order routes
 	ordersG := v1.Group("/order")
-	ordersG.GET(":serial", h.OrderListItemsBySerial)
+	ordersG.GET("/:serial", h.OrderListItemsBySerial)
 	ordersG.POST("", h.OrderInsert)
 	ordersG.POST("/item", h.OrderItemInsert)
 	ordersG.POST("/item/modifers", h.OrderItemInsertWithModifiers)
