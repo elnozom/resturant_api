@@ -13,11 +13,16 @@ type OrderResp struct {
 	DocNo      string
 	WaiterCode int
 }
+type OrderCreateResp struct {
+	HeadSerial int
+	DocNo      string
+}
 type OrderItemsResp struct {
-	OrderItemSerial int     `json:"orderItemSerial"`
-	Qnt             int     `json:"qnt"`
-	ItemPrice       float64 `json:"itemPrice"`
-	ItemSerial      int     `json:"itemSerial"`
-	ItemName        string  `json:"itemName"`
-	IsMod           bool    `json:"isMod"`
+	OrderItemSerial int
+	MainModSerial   int
+	Qnt             int
+	ItemPrice       float64
+	ItemSerial      int
+	ItemName        string
+	IsMod           bool
 }
