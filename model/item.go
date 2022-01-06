@@ -1,12 +1,14 @@
 package model
 
 type Item struct {
-	ItemSerial   int
-	ItemPrice    float32
-	ItemCode     int
-	ItemName     string
-	WithModifier bool
-	Screen       int
+	ItemSerial      int
+	ItemPrice       float32
+	ItemCode        int
+	ItemName        string
+	WithModifier    bool
+	Screen          int
+	OrderItemSerial int
+	MainModSerial   int
 }
 
 type InsertItemReq struct {
@@ -18,7 +20,7 @@ type InsertItemReq struct {
 }
 
 type InsertItemWithModifiersReq struct {
-	ItemsSerials       string
-	HeadSerial         int
-	OriginalItemSerial int
+	ItemsSerials    string
+	HeadSerial      int
+	OrderItemSerial int
 }

@@ -409,9 +409,8 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-
 CREATE PROCEDURE [dbo].[Stktr04InsertModifiers] 
-(@ItemsSerials nvarchar(100) ,@HeadSerial int,@OriginalItemSerial  int) 
+(@ItemsSerials nvarchar(100) ,@HeadSerial int,@OrderItemSerial  int) 
 	as
 	BEGIN  
 	SET NOCOUNT ON;
@@ -466,7 +465,7 @@ CREATE PROCEDURE [dbo].[Stktr04InsertModifiers]
 		1,
 		1,
 		@ItemPosi,
-		@OriginalItemSerial
+		@OrderItemSerial
 	)
         
 
@@ -486,7 +485,6 @@ CREATE PROCEDURE [dbo].[Stktr04InsertModifiers]
 
 
 
-
 GO
 -- list order and items by item serial
 -- i refers to item , oi refers to orderItem
@@ -497,5 +495,5 @@ GO
 CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
 AS
 BEGIN
-	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod , Price,0)ItemPrice , ItemSerial , i.ItemName ,oi.IsMod FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
+	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod = 1 , 0,Price) ItemPrice , ItemSerial , i.ItemName ,oi.IsMod,ISNULL(oi.MainModSerial , 0) MainModSerial FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
 END

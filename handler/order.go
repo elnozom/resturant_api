@@ -12,8 +12,8 @@ func (h *Handler) OrderInsert(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	var resp int
-	err := h.db.Raw("EXEC Stktr03Insert	@TableSerial = ? ,@Imei = ? ,@OrderType = ? ,@WaiterCode = ? ", req.TableSerial, req.Imei, req.OrderType, req.WaiterCode).Row().Scan(&resp)
+	var resp model.OrderCreateResp
+	err := h.db.Raw("EXEC Stktr03Insert	@TableSerial = ? ,@Imei = ? ,@OrderType = ? ,@WaiterCode = ? ", req.TableSerial, req.Imei, req.OrderType, req.WaiterCode).Row().Scan(&resp.HeadSerial, &resp.DocNo)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -49,7 +49,7 @@ func (h *Handler) OrderItemInsertWithModifiers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	var resp bool
-	err := h.db.Raw("EXEC Stktr04InsertModifiers @ItemsSerials = ? , @HeadSerial = ? , @OriginalItemSerial = ?", req.ItemsSerials, req.HeadSerial, req.OriginalItemSerial).Row().Scan(&resp)
+	err := h.db.Raw("EXEC Stktr04InsertModifiers @ItemsSerials = ? , @HeadSerial = ? , @OrderItemSerial = ?", req.ItemsSerials, req.HeadSerial, req.OrderItemSerial).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -70,7 +70,7 @@ func (h *Handler) OrderListItemsBySerial(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.OrderItemsResp
-		err = rows.Scan(&item.OrderItemSerial, &item.Qnt, &item.ItemPrice, &item.ItemSerial, &item.ItemName, &item.IsMod)
+		err = rows.Scan(&item.OrderItemSerial, &item.Qnt, &item.ItemPrice, &item.ItemSerial, &item.ItemName, &item.IsMod, &item.MainModSerial)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
