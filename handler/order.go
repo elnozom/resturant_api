@@ -43,6 +43,20 @@ func (h *Handler) OrderItemDelete(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func (h *Handler) OrderChangeTable(c echo.Context) error {
+	req := new(model.OrderChangeTableReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	var resp bool
+	err := h.db.Raw("EXEC StkTr03ChangeTable  @NewTableSerial = ? , @OldTableSerial = ?", req.NewSerial, req.OldSerial).Row().Scan(&resp)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
 func (h *Handler) OrderItemInsertWithModifiers(c echo.Context) error {
 	req := new(model.InsertItemWithModifiersReq)
 	if err := c.Bind(req); err != nil {
