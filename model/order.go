@@ -23,6 +23,8 @@ type OrderItemsResp struct {
 	Qnt             int
 	ItemPrice       float64
 	ItemSerial      int
+	WithModifier    bool
 	ItemName        string
 	IsMod           bool
+	Screen          int
 }

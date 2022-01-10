@@ -19,6 +19,11 @@ type InsertItemReq struct {
 	Qnt        int
 }
 
+type OrderChangeTableReq struct {
+	NewSerial int
+	OldSerial int
+}
+
 type InsertItemWithModifiersReq struct {
 	ItemsSerials    string
 	HeadSerial      int

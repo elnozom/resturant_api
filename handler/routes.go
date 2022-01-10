@@ -28,6 +28,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	ordersG := v1.Group("/order")
 	ordersG.GET("/:serial", h.OrderListItemsBySerial)
 	ordersG.POST("", h.OrderInsert)
+	ordersG.PUT("/changetable", h.OrderChangeTable)
 	ordersG.POST("/item", h.OrderItemInsert)
 	ordersG.POST("/item/modifers", h.OrderItemInsertWithModifiers)
 	ordersG.DELETE("/item/:serial", h.OrderItemDelete)

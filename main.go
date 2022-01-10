@@ -9,22 +9,6 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger" // echo-swagger middleware
 )
 
-// @title Swagger Example API
-// @version 1.0
-// @description Conduit API
-// @title Conduit API
-
-// @host 127.0.0.1:8585
-// @BasePath /api
-
-// @schemes http https
-// @produce	application/json
-// @consumes application/json
-
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-
 func main() {
 	r := router.New()
 

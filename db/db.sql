@@ -48,7 +48,7 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	DECLARE @TotalCash FLOAT
-	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" , ISNULL(StkTr03.PrintTimes , 0) PrintTimes , ISNULL(convert(char(5), DocDate, 108) , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo , ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) , ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) TotalCash  FROM  "Tables" LEFT JOIN StkTr03 ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 WHERE Tables.GroupTableNo = @GroupTableNo
+	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" , ISNULL(StkTr03.PrintTimes , 0) PrintTimes , ISNULL(convert(char(5), DocDate, 108) , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo , ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) WaiterCode , ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) TotalCash  FROM  "Tables" LEFT JOIN StkTr03 ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 WHERE Tables.GroupTableNo = @GroupTableNo
 END
 
 GO
@@ -496,4 +496,24 @@ CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
 AS
 BEGIN
 	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod = 1 , 0,Price) ItemPrice , ItemSerial , i.ItemName ,oi.IsMod,ISNULL(oi.MainModSerial , 0) MainModSerial FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
+END
+
+
+
+
+
+GO
+-- update table serial on stktr03
+-- close old table and open then new
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].StkTr03ChangeTable (@NewTableSerial int , @OldTableSerial int)
+AS
+BEGIN
+	Update StkTr03 SET TableSerial = @NewTableSerial  WHERE TableSerial = @OldTableSerial AND ISNULL(TotalCash , 0) = 0
+	UPDATE dbo.Tables SET pause = 0 , dbo.Tables.State = 'Free' WHERE Serial = @OldTableSerial
+	UPDATE dbo.Tables SET pause = 1 , dbo.Tables.State = 'Working' WHERE Serial = @NewTableSerial
+	SELECT 1 AS updated
 END
