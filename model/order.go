@@ -28,3 +28,15 @@ type OrderItemsResp struct {
 	IsMod           bool
 	Screen          int
 }
+type Discount struct {
+	DiscCode  int
+	DiscDesc  string
+	DiscValue float64
+	DelTax    bool
+}
+type ApplyDiscountReq struct {
+	HeadSerial int
+	Comment    string
+	DiscCode   int
+	DiscValue  float64
+}

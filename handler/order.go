@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"rms/model"
 
@@ -57,6 +58,48 @@ func (h *Handler) OrderChangeTable(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func (h *Handler) OrderChangeCustomer(c echo.Context) error {
+	req := new(model.OrderChangeCustomerReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	var resp bool
+	err := h.db.Raw("EXEC StkTr03ChangeCustomer  @HeadSerial = ? , @CustomerSerial = ?", req.HeadSerial, req.CustomerSerial).Row().Scan(&resp)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) OrderChangeWaiter(c echo.Context) error {
+	req := new(model.OrderChangeWaiterReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	var resp bool
+	err := h.db.Raw("EXEC StkTr03ChangeWaiter  @HeadSerial = ? , @WaiterCode = ?", req.HeadSerial, req.WaiterCode).Row().Scan(&resp)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) OrderApplyDiscount(c echo.Context) error {
+	req := new(model.ApplyDiscountReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	fmt.Println(req)
+	var resp bool
+	err := h.db.Raw("EXEC StkTr03ApplyDiscount  @HeadSerial = ?, @DiscCode = ? , @DiscPercent = ? , @Comment = ?  ", req.HeadSerial, req.DiscCode, req.DiscValue, req.Comment).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
 func (h *Handler) OrderItemInsertWithModifiers(c echo.Context) error {
 	req := new(model.InsertItemWithModifiersReq)
 	if err := c.Bind(req); err != nil {
@@ -91,4 +134,22 @@ func (h *Handler) OrderListItemsBySerial(c echo.Context) error {
 		items = append(items, item)
 	}
 	return c.JSON(http.StatusOK, items)
+}
+
+func (h *Handler) DiscountsListAll(c echo.Context) error {
+	var codes []model.Discount
+	rows, err := h.db.Raw("EXEC DisCodesListAll  ").Rows()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var code model.Discount
+		err = rows.Scan(&code.DiscCode, &code.DiscDesc, &code.DiscValue, &code.DelTax)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		codes = append(codes, code)
+	}
+	return c.JSON(http.StatusOK, codes)
 }
