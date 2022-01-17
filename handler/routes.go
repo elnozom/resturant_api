@@ -7,10 +7,13 @@ import (
 func (h *Handler) Register(v1 *echo.Group) {
 
 	//global routes [ authinticate ]
+	v1.GET("/employee/waiters", h.EmpListWaiters)
 	v1.GET("/employee/:code", h.EmpGetByCode)
-	v1.GET("/employee//barcode/:code", h.EmpGetByBarCode)
+	v1.GET("/employee/barcode/:code", h.EmpGetByBarCode)
 	v1.GET("/authorize/:imei", h.CheckDeviceAuthorization)
 	v1.POST("/authorize", h.InsertDevice)
+	v1.GET("/customers", h.CustomersListByName)
+	v1.GET("/discounts", h.DiscountsListAll)
 
 	// tables routes
 	tablesG := v1.Group("/tables")
@@ -28,10 +31,14 @@ func (h *Handler) Register(v1 *echo.Group) {
 	ordersG := v1.Group("/order")
 	ordersG.GET("/:serial", h.OrderListItemsBySerial)
 	ordersG.POST("", h.OrderInsert)
-	ordersG.PUT("/changetable", h.OrderChangeTable)
 	ordersG.POST("/item", h.OrderItemInsert)
 	ordersG.POST("/item/modifers", h.OrderItemInsertWithModifiers)
 	ordersG.DELETE("/item/:serial", h.OrderItemDelete)
+	// update routes
+	ordersG.PUT("/table", h.OrderChangeTable)
+	ordersG.PUT("/customer", h.OrderChangeCustomer)
+	ordersG.PUT("/waiter", h.OrderChangeWaiter)
+	ordersG.PUT("/discount", h.OrderApplyDiscount)
 
 	// items routes
 	itemsG := v1.Group("/item")

@@ -16,12 +16,13 @@
 USE RMSS
 
 GO
-CREATE PROCEDURE EmployeeGetByCode (@EmpCode int)
+CREATE  PROCEDURE EmployeeGetByCode (@EmpCode int = 0 , @BarCode int = 0)
 AS
 BEGIN
-	SELECT       EmpName, EmpPassword , EmpCode
+	SELECT       EmpName, EmpPassword , EmpCode	 , SecLevel
 	FROM            Employee 
-	WHERE EmpCode = @EmpCode
+	WHERE BarCode = CASE WHEN @BarCode = 0 THEN BarCode ELSE @BarCode END 
+	AND EmpCode = CASE WHEN @EmpCode = 0 THEN EmpCode ELSE @EmpCode END
 END
 
 
@@ -246,9 +247,68 @@ GO
 CREATE PROCEDURE StkTr04Delete(@Serial int)
 AS
 BEGIN
-	DELETE FROM StkTr04 WHERE StkTr04.Serial = @Serial
-	SELECT 1 DeltedSucessfully
 	
+	DECLARE @ItemSerial int
+	DECLARE @Qnt int
+	DECLARE @Price int
+	DECLARE @DocType int
+	DECLARE @DocDate DATETIME
+	DECLARE @CashTrySerial int
+	DECLARE @MinorPerMajor int
+	DECLARE @CasherCode int
+	DECLARE @IsAdd bit
+	DECLARE @IsPrinted bit
+	DECLARE @BonOrder  int
+	DECLARE @HeadSerial  int
+
+
+	SELECT 	@ItemSerial = ItemSerial ,
+			@Qnt = Qnt,
+			@HeadSerial = HeadSerial,
+			@Price = Price,
+			@DocDate = StkTr03.DocDate,
+			@CashTrySerial = StkTr03.CashTrySerial,
+			@MinorPerMajor = MinorPerMajor,
+			@CasherCode = StkTr03.WaiterCode,
+			@IsAdd = IsMod,
+			@IsPrinted = Printed,
+			@BonOrder = OrderNo
+	
+	 FROM StkTr04 JOIN StkTr03 ON HeadSerial = StkTr03.Serial WHERE StkTr04.Serial = @Serial
+
+	
+
+	DELETE FROM StkTr04 WHERE StkTr04.Serial = @Serial OR MainModSerial = @Serial
+	SELECT 1 DeltedSucessfully
+
+	SELECT Serial FROM StkTr04 WHERE HeadSerial = @HeadSerial
+	IF @@ROWCOUNT = 0
+		BEGIN
+			DELETE FROM StkTr03 WHERE Serial = @HeadSerial
+		END	
+	INSERT INTO DeletedItems (
+		ItemSerial,
+		Qnt,
+		Price,
+		DocDate,
+		CashTrySerial,
+		MinorPerMajor,
+		CasherCode,
+		ISAdd,
+		IsPrinted,
+		BonOrder)
+		VALUES (
+			@ItemSerial,
+			@Qnt,
+			@Price,
+			@DocDate,
+			@CashTrySerial,
+			@MinorPerMajor,
+			@CasherCode,
+			@IsAdd,
+			@IsPrinted,
+			@BonOrder
+		)
 END
 
 
@@ -517,3 +577,80 @@ BEGIN
 	UPDATE dbo.Tables SET pause = 1 , dbo.Tables.State = 'Working' WHERE Serial = @NewTableSerial
 	SELECT 1 AS updated
 END
+
+
+
+GO
+-- update accounttsettrial on stktr03
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].StkTr03ChangeCustomer (@HeadSerial int , @CustomerSerial int)
+AS
+BEGIN
+	Update StkTr03 SET AccountSerial = @CustomerSerial  WHERE "Serial" = @HeadSerial
+	SELECT 1 AS updated
+END
+
+
+GO
+-- update accounttsettrial on stktr03
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].StkTr03ChangeWaiter (@HeadSerial int , @WaiterCode int)
+AS
+BEGIN
+	Update StkTr03 SET WaiterCode = @WaiterCode  WHERE "Serial" = @HeadSerial
+	SELECT 1 AS updated
+END
+
+GO
+-- update accounttsettrial on stktr03
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].StkTr03ApplyDiscount (@DiscCode int ,@DiscPercent  int ,@Comment VARCHAR='' , @HeadSerial int )
+AS
+BEGIN
+	Update StkTr03 SET DiscCode = @DiscCode , DiscountPercent = @DiscPercent , DiscComment = @Comment   WHERE "Serial" = @HeadSerial
+	SELECT 1 AS updated
+END
+
+
+GO
+-- get accounts from acc table tto list them into combobox
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].AccMs01ListByCodeNameType (@Code  int = 0 , @Name   nvarchar(20) = '', @Type int)
+AS
+if @Code = 0 
+	SELECT        Serial, AccountCode , AccountName 
+		FROM            AccMs01
+		WHERE        (AccountName like  ('%' + @Name + '%') and AccountType = @Type)
+else
+	SELECT        Serial, AccountCode , AccountName 
+		FROM            AccMs01
+		WHERE        (AccountCode = @Code and AccountType = @Type)
+
+
+
+
+
+GO
+-- get discount code from discodes table
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].DisCodesListAll
+AS
+
+SELECT * FROM DiscCodes
+
+

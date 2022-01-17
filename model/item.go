@@ -24,6 +24,16 @@ type OrderChangeTableReq struct {
 	OldSerial int
 }
 
+type OrderChangeCustomerReq struct {
+	CustomerSerial int
+	HeadSerial     int
+}
+
+type OrderChangeWaiterReq struct {
+	WaiterCode int
+	HeadSerial int
+}
+
 type InsertItemWithModifiersReq struct {
 	ItemsSerials    string
 	HeadSerial      int
