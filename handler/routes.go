@@ -39,6 +39,8 @@ func (h *Handler) Register(v1 *echo.Group) {
 	ordersG.PUT("/customer", h.OrderChangeCustomer)
 	ordersG.PUT("/waiter", h.OrderChangeWaiter)
 	ordersG.PUT("/discount", h.OrderApplyDiscount)
+	ordersG.PUT("/guests", h.OrderSetNoOfGuests)
+	ordersG.PUT("/transfer", h.OrderTransferItems)
 
 	// items routes
 	itemsG := v1.Group("/item")

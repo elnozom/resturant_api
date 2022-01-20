@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"rms/model"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -42,7 +43,12 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 	for rows.Next() {
 		var table model.Table
 		var prependedString string
-		err = rows.Scan(&table.Serial, &table.TableNo, &table.TableName, &table.Pause, &table.State, &table.PrintTimes, &table.OpenDateTime, &table.DocNo, &table.HeadSerial, &table.WaiterCode, &table.TotalCash)
+		err = rows.Scan(
+			&table.Serial, &table.TableNo, &table.TableName, &table.Pause,
+			&table.State, &table.PrintTimes, &table.OpenDate,
+			&table.DocNo,
+			&table.OrderNo, &table.BonNo, &table.Guests, &table.HeadSerial, &table.WaiterCode, &table.CustomerSerial,
+			&table.TotalCash)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -54,6 +60,9 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 		}
 		table.Status = fmt.Sprintf("%s%s", table.State, prependedString)
 
+		splittedDate := strings.Split(table.OpenDate, "T")
+		table.OpenDate = splittedDate[0]
+		table.OpenTime = strings.Split(splittedDate[1], ".")[0]
 		tables = append(tables, table)
 	}
 

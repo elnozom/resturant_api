@@ -100,6 +100,30 @@ func (h *Handler) OrderApplyDiscount(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func (h *Handler) OrderSetNoOfGuests(c echo.Context) error {
+	req := new(model.NoOfGuestsReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	fmt.Println(req)
+	var resp bool
+	err := h.db.Raw("EXEC StkTr03SetNoOfGuests  @HeadSerial = ?, @Guests = ?   ", req.HeadSerial, req.Guests).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+func (h *Handler) OrderTransferItems(c echo.Context) error {
+	req := new(model.TransferItemsReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	fmt.Println(req)
+	_ = h.db.Raw("EXEC Stktr04TransferItems  @TableSerial = ?, @ItemsSerials = ?  , @Imei = ?  , @WaiterCode = ?  , @Split = ? ", req.TableSerial, req.ItemsSerials, req.Imei, req.WaiterCode, req.Split).Row()
+
+	return c.JSON(http.StatusOK, true)
+}
+
 func (h *Handler) OrderItemInsertWithModifiers(c echo.Context) error {
 	req := new(model.InsertItemWithModifiersReq)
 	if err := c.Bind(req); err != nil {

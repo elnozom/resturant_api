@@ -49,7 +49,20 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	DECLARE @TotalCash FLOAT
-	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" , ISNULL(StkTr03.PrintTimes , 0) PrintTimes , ISNULL(convert(char(5), DocDate, 108) , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo , ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) WaiterCode , ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) TotalCash  FROM  "Tables" LEFT JOIN StkTr03 ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 WHERE Tables.GroupTableNo = @GroupTableNo
+	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" ,
+	 	ISNULL(StkTr03.PrintTimes , 0) PrintTimes , 
+	 	ISNULL(DocDate , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo ,
+		ISNULL(StkTr03.OrderNo , 0) OrderNo ,
+		ISNULL(StkTr03.BonNo , 0) BonNo ,
+		ISNULL(StkTr03.CustSNo , 0) Guests ,
+	  	ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) WaiterCode 
+		  , ISNULL(StkTr03.AccountSerial ,0) AccountSerial ,
+	   	ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) TotalCash 
+	FROM  "Tables" 
+		LEFT JOIN StkTr03 
+		ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 
+	
+	WHERE Tables.GroupTableNo = @GroupTableNo
 END
 
 GO
@@ -317,10 +330,6 @@ END
 
 GO
 -- insert into comuse table to activate the device in first time to use it
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
 CREATE PROCEDURE  [dbo].[ComUseInsert] (@Imei VARCHAR(50) , @ComName VARCHAR(100))
  AS
@@ -337,10 +346,6 @@ GO
 -- get device from comuse table to check if device is authorized or not
 
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
 CREATE PROCEDURE  [dbo].[ComUseGetDevice] (@Imei VARCHAR(50))
  AS
@@ -355,10 +360,6 @@ CREATE PROCEDURE  [dbo].[ComUseGetDevice] (@Imei VARCHAR(50))
 
 GO
 --list product modifers
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[StkMs01GetModifiersBySerial](@Serial int)
 AS
 BEGIN
@@ -378,10 +379,7 @@ END
 GO
 -- check if table is already paused & pause it if its not paused
 -- it will return true if the table was not paused and false if it was
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+
 CREATE PROCEDURE [dbo].[TablesOpenOrder](@Serial int , @EmpCode int , @Imei VARCHAR(50))
 AS
 BEGIN
@@ -390,19 +388,25 @@ BEGIN
 	DECLARE @State VARCHAR(10)
 	DECLARE @CurrentEmpCode VARCHAR(10)
 	DECLARE @ComputerName VARCHAR(50)
+	DECLARE @SecLevel INT
 	SELECT @Paused =  dbo.Tables.pause , @State = dbo.Tables.State From dbo.Tables WHERE Serial = @Serial
-
-
+	SELECT @SecLevel = SecLevel FROM Employee WHERE EmpCode = @EmpCode
 	IF @paused = 1
 		BEGIN
 			SELECT (0) IsOrderOpened , 'paused' msg
 			RETURN
 		END
 
+
+	IF @State = 'Free' AND @SecLevel > 4
+		BEGIN 
+			SELECT (0) IsOrerOpened , 'unauthorized' msg
+			RETURN
+		END
 	IF @State = 'Working'
 		BEGIN
 			SELECT @CurrentEmpCode =  WaiterCode From StkTr03 WHERE TableSerial = @Serial AND Finished = 0
-			IF @CurrentEmpCode != @EmpCode
+			IF @CurrentEmpCode != @EmpCode AND @SecLevel < 4
 				BEGIN
 					SELECT (0) IsOrerOpened , 'unauthorized' msg
 					RETURN
@@ -424,10 +428,6 @@ END
 GO
 -- check if table is already paused & pause it if its not paused
 -- it will return true if the table was not paused and false if it was
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[TablesUnPause](@Serial int , @Imei VARCHAR(50))
 AS
 BEGIN
@@ -445,10 +445,6 @@ END
 
 GO
 --reset the orders tables
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[Reset]
 AS
 BEGIN
@@ -465,10 +461,6 @@ END
 
 GO
 --insert modifers into stktr04 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].[Stktr04InsertModifiers] 
 (@ItemsSerials nvarchar(100) ,@HeadSerial int,@OrderItemSerial  int) 
 	as
@@ -548,10 +540,6 @@ CREATE PROCEDURE [dbo].[Stktr04InsertModifiers]
 GO
 -- list order and items by item serial
 -- i refers to item , oi refers to orderItem
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
 AS
 BEGIN
@@ -565,10 +553,6 @@ END
 GO
 -- update table serial on stktr03
 -- close old table and open then new
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].StkTr03ChangeTable (@NewTableSerial int , @OldTableSerial int)
 AS
 BEGIN
@@ -582,10 +566,6 @@ END
 
 GO
 -- update accounttsettrial on stktr03
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].StkTr03ChangeCustomer (@HeadSerial int , @CustomerSerial int)
 AS
 BEGIN
@@ -596,10 +576,6 @@ END
 
 GO
 -- update accounttsettrial on stktr03
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].StkTr03ChangeWaiter (@HeadSerial int , @WaiterCode int)
 AS
 BEGIN
@@ -609,10 +585,6 @@ END
 
 GO
 -- update accounttsettrial on stktr03
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].StkTr03ApplyDiscount (@DiscCode int ,@DiscPercent  int ,@Comment VARCHAR='' , @HeadSerial int )
 AS
 BEGIN
@@ -622,11 +594,18 @@ END
 
 
 GO
+-- update CustSNo on stktr03
+
+CREATE PROCEDURE [dbo].StkTr03SetNoOfGuests (@Guests int ,@HeadSerial int )
+AS
+BEGIN
+	Update StkTr03 SET CustSNo = @Guests  WHERE "Serial" = @HeadSerial
+	SELECT 1 AS updated
+END
+
+
+GO
 -- get accounts from acc table tto list them into combobox
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].AccMs01ListByCodeNameType (@Code  int = 0 , @Name   nvarchar(20) = '', @Type int)
 AS
 if @Code = 0 
@@ -644,13 +623,57 @@ else
 
 GO
 -- get discount code from discodes table
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 CREATE PROCEDURE [dbo].DisCodesListAll
 AS
 
 SELECT * FROM DiscCodes
 
 
+
+GO
+-- transfer items from table to table
+--the other table colud be working or free
+-- if free we will create a new order on it
+-- if working we will add the selected items to current order on the target table
+
+CREATE PROCEDURE [dbo].[Stktr04TransferItems](@TableSerial int , @ItemsSerials nvarchar(100),@Imei VARCHAR(50),@WaiterCode int )
+AS
+BEGIN
+	DECLARE @Paused BIT
+	DECLARE @State VARCHAR(10)
+	declare @TNo int 
+	declare @HeadSerail2 int 
+	declare @StkTr04Serial int
+	SELECT @Paused =  dbo.Tables.pause , @State = dbo.Tables.State ,@TNo = dbo.Tables.TableNo From dbo.Tables WHERE Serial = @TableSerial
+	
+	IF @State = 'Working'
+	BEGIN
+			select @HeadSerail2 = Serial from StkTr03 where TableSerial = @TableSerial AND ISNULL(TotalCash , 0) = 0
+	END
+	ELSE
+	BEGIN
+	 EXEC Stktr03Insert  @TableSerial,@Imei,2,@WaiterCode ,@HeadSerial = @HeadSerail2 output
+
+	END 
+	declare I_Serial cursor
+	for
+	SELECT Split.a.value('.', 'NVARCHAR(MAX)') DATA
+    FROM
+	  (
+		 SELECT CAST('<X>'+REPLACE(@ItemsSerials, ',', '</X><X>')+'</X>' AS XML) AS String
+       ) AS A
+		CROSS APPLY String.nodes('/X') AS Split(a)
+		
+		open I_Serial
+		Fetch Next From I_Serial into
+		 @StkTr04Serial 
+	while @@FETCH_STATUS = 0
+	begin 
+		Update StkTr04 SET HeadSerial  = @HeadSerail2  WHERE Serial = @StkTr04Serial
+		Fetch Next From I_Serial into
+		 @StkTr04Serial 
+	end 
+		Close I_Serial
+		DEALLOCATE   I_Serial
+
+END
