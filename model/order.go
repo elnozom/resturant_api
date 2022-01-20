@@ -40,3 +40,15 @@ type ApplyDiscountReq struct {
 	DiscCode   int
 	DiscValue  float64
 }
+type NoOfGuestsReq struct {
+	HeadSerial int
+	Guests     int
+}
+
+type TransferItemsReq struct {
+	TableSerial  int
+	ItemsSerials string
+	Imei         string
+	WaiterCode   int
+	Split        bool
+}
