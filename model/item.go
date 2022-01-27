@@ -8,6 +8,7 @@ type Item struct {
 	WithModifier    bool
 	Screen          int
 	OrderItemSerial int
+	Qnt             float32
 	MainModSerial   int
 }
 

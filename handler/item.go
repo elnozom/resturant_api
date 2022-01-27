@@ -10,16 +10,17 @@ import (
 // this function is responsible for listing all group tabls by calling stored procedure [GroupTablesList]
 func (h *Handler) ItemsListByGroupAndMenu(c echo.Context) error {
 	group := c.Param("group")
+	tableSerial := c.Param("tableSerial")
 
 	var items []model.Item
-	rows, err := h.db.Raw("EXEC StkMs01ListByMenuAndGroup 	@GroupCode = ?", group).Rows()
+	rows, err := h.db.Raw("EXEC StkMs01ListByMenuAndGroup 	@GroupCode = ? , @TableSerial = ?", group, tableSerial).Rows()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var item model.Item
-		err = rows.Scan(&item.ItemSerial, &item.ItemPrice, &item.ItemCode, &item.ItemName, &item.WithModifier)
+		err = rows.Scan(&item.ItemSerial, &item.ItemPrice, &item.ItemCode, &item.ItemName, &item.WithModifier, &item.Qnt)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

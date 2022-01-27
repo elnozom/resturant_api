@@ -12,7 +12,7 @@ import (
 // this function is responsible for listing all group tables by calling stored procedure [GroupTablesList]
 func (h *Handler) GroupTablesList(c echo.Context) error {
 	var groups []model.TableGroup
-	rows, err := h.db.Raw("EXEC GroupTablesList").Rows()
+	rows, err := h.db.Raw("EXEC GroupTablesList @EmpCode = ?", c.QueryParam("EmpCode")).Rows()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

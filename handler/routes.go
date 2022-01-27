@@ -30,6 +30,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	// order routes
 	ordersG := v1.Group("/order")
 	ordersG.GET("/:serial", h.OrderListItemsBySerial)
+	ordersG.GET("/print/:serial", h.OrderListItemsForPrint)
 	ordersG.POST("", h.OrderInsert)
 	ordersG.POST("/item", h.OrderItemInsert)
 	ordersG.POST("/item/modifers", h.OrderItemInsertWithModifiers)
@@ -44,7 +45,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 
 	// items routes
 	itemsG := v1.Group("/item")
-	itemsG.GET("/:group", h.ItemsListByGroupAndMenu)
+	itemsG.GET("/:group/:tableSerial", h.ItemsListByGroupAndMenu)
 	itemsG.GET("/modifiers/:serial", h.ItemsGetModifiersBySerial)
 
 }
