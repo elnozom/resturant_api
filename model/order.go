@@ -28,6 +28,35 @@ type OrderItemsResp struct {
 	IsMod           bool
 	Screen          int
 }
+
+type PrintItemResp struct {
+	ItemName string
+	Qnt      int
+	Price    float64
+	Total    float64
+}
+type PrintConfigResp struct {
+	DocDate         string
+	DocTime         string
+	CashtryNo       int
+	CustomerName    string
+	OrderNo         int
+	BonNo           int
+	WaiterCode      int
+	WaiterName      string
+	TableNO         string
+	GroupTableName  string
+	GuestsNo        int
+	DiscountPercent int
+	DiscountValue   float64
+	SaleTax         float64
+	SubTotal        float64
+	Total           float64
+}
+type PrintResp struct {
+	Items  []PrintItemResp
+	Config PrintConfigResp
+}
 type Discount struct {
 	DiscCode  int
 	DiscDesc  string
