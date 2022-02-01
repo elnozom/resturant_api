@@ -30,6 +30,24 @@ func (h *Handler) ItemsListByGroupAndMenu(c echo.Context) error {
 	return c.JSON(http.StatusOK, items)
 }
 
+func (h *Handler) AddonsListAll(c echo.Context) error {
+	rows, err := h.db.Raw("EXEC ISCodeListAll").Rows()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	var items []string
+	for rows.Next() {
+		var item string
+		err = rows.Scan(&item)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		items = append(items, item)
+	}
+	defer rows.Close()
+	return c.JSON(http.StatusOK, items)
+}
+
 // this function is responsible for listing all group tabls by calling stored procedure [GroupTablesList]
 func (h *Handler) ItemsGetModifiersBySerial(c echo.Context) error {
 	serial := c.Param("serial")

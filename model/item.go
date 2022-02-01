@@ -10,6 +10,7 @@ type Item struct {
 	OrderItemSerial int
 	Qnt             float32
 	MainModSerial   int
+	AddItems        string
 }
 
 type InsertItemReq struct {

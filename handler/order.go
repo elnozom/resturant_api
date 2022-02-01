@@ -114,6 +114,16 @@ func (h *Handler) OrderSetNoOfGuests(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, resp)
 }
+
+func (h *Handler) OrderUpdateAddons(c echo.Context) error {
+	req := new(model.AddonsReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	_ = h.db.Raw("EXEC StkTr04ApplyAddons  @Serial = ?, @Addons = ? ", req.Serial, req.Addons).Row()
+
+	return c.JSON(http.StatusOK, true)
+}
 func (h *Handler) OrderTransferItems(c echo.Context) error {
 	req := new(model.TransferItemsReq)
 	if err := c.Bind(req); err != nil {
@@ -152,7 +162,7 @@ func (h *Handler) OrderListItemsBySerial(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.OrderItemsResp
-		err = rows.Scan(&item.OrderItemSerial, &item.Qnt, &item.ItemPrice, &item.ItemSerial, &item.ItemName, &item.IsMod, &item.MainModSerial)
+		err = rows.Scan(&item.OrderItemSerial, &item.Qnt, &item.ItemPrice, &item.ItemSerial, &item.ItemName, &item.IsMod, &item.MainModSerial, &item.AddItems)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

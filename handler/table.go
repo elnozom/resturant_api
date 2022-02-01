@@ -44,11 +44,25 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 		var table model.Table
 		var prependedString string
 		err = rows.Scan(
-			&table.Serial, &table.TableNo, &table.TableName, &table.Pause,
-			&table.State, &table.PrintTimes, &table.OpenDate,
+			&table.Serial,
+			&table.TableNo,
+			&table.TableName,
+			&table.Pause,
+			&table.State,
+			&table.PrintTimes,
+			&table.OpenDate,
 			&table.DocNo,
-			&table.OrderNo, &table.BonNo, &table.Guests, &table.HeadSerial, &table.WaiterCode, &table.CustomerSerial,
-			&table.TotalCash)
+			&table.OrderNo,
+			&table.BonNo,
+			&table.Guests,
+			&table.HeadSerial,
+			&table.WaiterCode,
+			&table.CustomerSerial,
+			&table.Subtotal,
+			&table.DiscountPercent,
+		)
+		table.DiscountValue = float64(table.DiscountPercent) * table.Subtotal / 100
+		table.TotalCash = table.Subtotal - table.DiscountValue
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
