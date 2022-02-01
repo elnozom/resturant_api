@@ -49,15 +49,22 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	DECLARE @TotalCash FLOAT
-	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" ,
-	 	ISNULL(StkTr03.PrintTimes , 0) PrintTimes , 
-	 	ISNULL(DocDate , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo ,
-		ISNULL(StkTr03.OrderNo , 0) OrderNo ,
-		ISNULL(StkTr03.BonNo , 0) BonNo ,
-		ISNULL(StkTr03.CustSNo , 0) Guests ,
-	  	ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) WaiterCode 
-		  , ISNULL(StkTr03.AccountSerial ,0) AccountSerial ,
-	   	ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) TotalCash 
+	SELECT  Tables.Serial ,
+	  		Tables.TableNo ,
+			TableName ,
+			"pause" ,
+			"State" ,
+			ISNULL(StkTr03.PrintTimes , 0) PrintTimes , 
+			ISNULL(DocDate , '') DocDate ,
+			ISNULL(StkTr03.DocNo , '') DocNo ,
+			ISNULL(StkTr03.OrderNo , 0) OrderNo ,
+			ISNULL(StkTr03.BonNo , 0) BonNo ,
+			ISNULL(StkTr03.CustSNo , 0) Guests ,
+			ISNULL(StkTr03.Serial , 0) HeadSerail ,
+			ISNULL(StkTr03.WaiterCode ,0) WaiterCode ,
+			ISNULL(StkTr03.AccountSerial ,0) AccountSerial ,
+			ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) Subtotal ,
+			ISNULL(DiscountPercent , 0) DiscountPercent,
 	FROM  "Tables" 
 		LEFT JOIN StkTr03 
 		ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 
@@ -76,6 +83,15 @@ BEGIN
 	SET NOCOUNT ON;
 
 	SELECT  GroupTypeID , GroupTypeName FROM  "GroupType"
+END
+
+
+GO
+-- list all addons
+CREATE PROCEDURE ISCodeListAll
+AS
+BEGIN
+	SELECT  ISDisc FROM  ISCodes
 END
 
 
@@ -543,7 +559,7 @@ GO
 CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
 AS
 BEGIN
-	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod = 1 , 0,ISNULL(Price , 0)) ItemPrice , ItemSerial , i.ItemName ,oi.IsMod,ISNULL(oi.MainModSerial , 0) MainModSerial FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
+	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod = 1 , 0,ISNULL(Price , 0)) ItemPrice , ItemSerial , i.ItemName ,oi.IsMod,ISNULL(oi.MainModSerial , 0) MainModSerial , ISNULL(oi.AddItems , '') AddItems FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
 END
 
 
@@ -589,6 +605,16 @@ CREATE PROCEDURE [dbo].StkTr03ApplyDiscount (@DiscCode int ,@DiscPercent  int ,@
 AS
 BEGIN
 	Update StkTr03 SET DiscCode = @DiscCode , DiscountPercent = @DiscPercent , DiscComment = @Comment   WHERE "Serial" = @HeadSerial
+	SELECT 1 AS updated
+END
+
+
+GO
+-- update StkTr04 AddItems
+CREATE PROCEDURE [dbo].StkTr04ApplyAddons (@Serial INT, @Addons TEXT)
+AS
+BEGIN
+	Update StkTr04 SET AddItems = @Addons WHERE "Serial" = @Serial
 	SELECT 1 AS updated
 END
 

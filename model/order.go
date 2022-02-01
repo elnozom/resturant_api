@@ -27,6 +27,7 @@ type OrderItemsResp struct {
 	ItemName        string
 	IsMod           bool
 	Screen          int
+	AddItems        string
 }
 
 type PrintItemResp struct {
@@ -80,4 +81,8 @@ type TransferItemsReq struct {
 	Imei         string
 	WaiterCode   int
 	Split        bool
+}
+type AddonsReq struct {
+	Serial int
+	Addons string
 }

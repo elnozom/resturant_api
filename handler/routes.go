@@ -42,10 +42,12 @@ func (h *Handler) Register(v1 *echo.Group) {
 	ordersG.PUT("/discount", h.OrderApplyDiscount)
 	ordersG.PUT("/guests", h.OrderSetNoOfGuests)
 	ordersG.PUT("/transfer", h.OrderTransferItems)
+	ordersG.PUT("/addons", h.OrderUpdateAddons)
 
 	// items routes
 	itemsG := v1.Group("/item")
 	itemsG.GET("/:group/:tableSerial", h.ItemsListByGroupAndMenu)
 	itemsG.GET("/modifiers/:serial", h.ItemsGetModifiersBySerial)
+	itemsG.GET("/addons", h.AddonsListAll)
 
 }

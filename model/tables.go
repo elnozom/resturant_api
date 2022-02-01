@@ -22,21 +22,24 @@ type TablesOpenOrderReq struct {
 }
 
 type Table struct {
-	Serial         int
-	TableNo        int
-	TableName      string
-	Pause          bool
-	State          string
-	PrintTimes     int
-	Status         string
-	OpenDate       string
-	OpenTime       string
-	OrderNo        int
-	BonNo          int
-	DocNo          string
-	HeadSerial     int
-	Guests         int
-	WaiterCode     int
-	CustomerSerial int
-	TotalCash      float64
+	Serial          int
+	TableNo         int
+	TableName       string
+	Pause           bool
+	State           string
+	PrintTimes      int
+	Status          string
+	OpenDate        string
+	OpenTime        string
+	OrderNo         int
+	BonNo           int
+	DocNo           string
+	HeadSerial      int
+	Guests          int
+	WaiterCode      int
+	CustomerSerial  int
+	Subtotal        float64
+	DiscountPercent int
+	DiscountValue   float64
+	TotalCash       float64
 }
