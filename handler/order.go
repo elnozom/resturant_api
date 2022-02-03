@@ -210,7 +210,7 @@ func (h *Handler) DiscountsListAll(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var code model.Discount
-		err = rows.Scan(&code.DiscCode, &code.DiscDesc, &code.DiscValue, &code.DelTax)
+		err = rows.Scan(&code.DiscCode, &code.DiscDesc, &code.DiscValue, &code.DelTax, &code.SecLevel)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
