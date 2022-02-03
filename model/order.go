@@ -63,6 +63,7 @@ type Discount struct {
 	DiscDesc  string
 	DiscValue float64
 	DelTax    bool
+	SecLevel  int
 }
 type ApplyDiscountReq struct {
 	HeadSerial int
