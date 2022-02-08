@@ -16,9 +16,10 @@ type TablesOpenOrderResp struct {
 }
 
 type TablesOpenOrderReq struct {
-	Imei    string
-	Serial  int
-	EmpCode int
+	Imei       string
+	Serial     int
+	EmpCode    int
+	HeadSerial int
 }
 
 type Table struct {
