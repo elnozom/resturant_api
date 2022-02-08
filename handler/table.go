@@ -108,8 +108,10 @@ func (h *Handler) TablesUnPause(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	var IsTableClosed bool
-	err := h.db.Raw("EXEC TablesUnPause @Serial = ?  , @Imei = ?", req.Serial, req.Imei).Row().Scan(&IsTableClosed)
+	err := h.db.Raw("EXEC TablesUnPause @Serial = ?  , @Imei = ? , @HeadSerail = ?", req.Serial, req.Imei, req.HeadSerial).Row().Scan(&IsTableClosed)
 	if err != nil {
+		fmt.Println("close")
+		fmt.Println(err.Error())
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, IsTableClosed)
