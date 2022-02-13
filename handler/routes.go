@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+//comment
 func (h *Handler) Register(v1 *echo.Group) {
 
 	//global routes [ authinticate ]
