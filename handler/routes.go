@@ -14,6 +14,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	v1.POST("/authorize", h.InsertDevice)
 	v1.GET("/customers", h.CustomersListByName)
 	v1.GET("/discounts", h.DiscountsListAll)
+	v1.GET("/options", h.PosOptionsGet)
 
 	// tables routes
 	tablesG := v1.Group("/tables")
@@ -49,5 +50,13 @@ func (h *Handler) Register(v1 *echo.Group) {
 	itemsG.GET("/:group/:tableSerial", h.ItemsListByGroupAndMenu)
 	itemsG.GET("/modifiers/:serial", h.ItemsGetModifiersBySerial)
 	itemsG.GET("/addons", h.AddonsListAll)
+
+	// cart routes
+	cartG := v1.Group("/cart")
+	cartG.GET("", h.ListCartItems)
+	cartG.POST("", h.CreateCart)
+	cartG.POST("/item", h.CreateCartItem)
+	// cartG.PUT("/:id", h.UpdatetCartItems)
+	cartG.DELETE("/:serial", h.DeleteCartItem)
 
 }
