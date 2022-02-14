@@ -52,6 +52,7 @@ type PrintConfigResp struct {
 	DiscountValue   float64
 	SaleTax         float64
 	SubTotal        float64
+	TaxPercent      float64
 	Total           float64
 }
 type PrintResp struct {

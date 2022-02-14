@@ -196,7 +196,8 @@ func (h *Handler) OrderListItemsForPrint(c echo.Context) error {
 	resp.Config.DocTime = strings.Split(resp.Config.DocTime, "T")[1]
 	resp.Config.DocTime = resp.Config.DocTime[0:5]
 	resp.Config.DiscountValue = float64(resp.Config.DiscountPercent) * resp.Config.SubTotal / 100
-	resp.Config.SaleTax = (14.0 * resp.Config.SubTotal) / 100
+	resp.Config.SaleTax = (h.tax * resp.Config.SubTotal) / 100
+	resp.Config.TaxPercent = h.tax
 	resp.Config.Total = (resp.Config.SubTotal + resp.Config.SaleTax) - resp.Config.DiscountValue
 	return c.JSON(http.StatusOK, resp)
 }
