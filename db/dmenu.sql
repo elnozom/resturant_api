@@ -100,3 +100,14 @@ BEGIN
     UPDATE NozTrCartItems SET Qnt = @Qnt WHERE CartItemSerial = @Serial
     SELECT 1 AS Updated
 END
+
+ALTER TABLE StkMs01
+ADD ItemNameEn VARCHAR(100); 
+
+
+ALTER TABLE GroupCode
+ADD GroupNameEn VARCHAR(100); 
+
+
+ALTER TABLE GroupType
+ADD GroupTypeNameEn VARCHAR(100);

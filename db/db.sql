@@ -64,7 +64,7 @@ BEGIN
 			ISNULL(StkTr03.WaiterCode ,0) WaiterCode ,
 			ISNULL(StkTr03.AccountSerial ,0) AccountSerial ,
 			ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) Subtotal ,
-			ISNULL(DiscountPercent , 0) DiscountPercent,
+			ISNULL(DiscountPercent , 0) DiscountPercent
 	FROM  "Tables" 
 		LEFT JOIN StkTr03 
 		ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 
