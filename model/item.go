@@ -7,6 +7,7 @@ type Item struct {
 	ItemName        string
 	WithModifier    bool
 	Screen          int
+	SreenTimes      int
 	OrderItemSerial int
 	Qnt             float32
 	MainModSerial   int

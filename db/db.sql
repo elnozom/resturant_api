@@ -374,19 +374,15 @@ CREATE PROCEDURE  [dbo].[ComUseGetDevice] (@Imei VARCHAR(50))
 
 
 
+
 GO
 --list product modifers
-CREATE PROCEDURE [dbo].[StkMs01GetModifiersBySerial](@Serial int)
+GO
+CREATE PROCEDURE [dbo].StkMs01GetModifiersBySerial(@Serial int)
 AS
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
-	SET NOCOUNT ON;
-
-	SELECT i.Serial , i.ItemCode , i.ItemName , m.ScreenNo   FROM  Modifires m JOIN StkMs01 i ON i.Serial = m.ModSerial  WHERE m.ItemSerial= @Serial
-
+	SELECT i.Serial , i.ItemCode , i.ItemName , m.ScreenNo , m.ScreenTimes   FROM  Modifires m JOIN StkMs01 i ON i.Serial = m.ModSerial  WHERE m.ItemSerial= @Serial
 END
-
 
 
 
