@@ -62,7 +62,7 @@ func (h *Handler) ItemsGetModifiersBySerial(c echo.Context) error {
 	items := make(map[int][]model.Item)
 	for rows.Next() {
 		var item model.Item
-		err = rows.Scan(&item.ItemSerial, &item.ItemCode, &item.ItemName, &item.Screen, &item.SreenTimes)
+		err = rows.Scan(&item.ItemSerial, &item.ItemCode, &item.ItemName, &item.Screen, &item.ScreenTimes)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
