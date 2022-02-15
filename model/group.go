@@ -3,7 +3,8 @@ package model
 type MainGroup struct {
 	GroupCode int
 	GroupName string
-	Icon      string
+
+	Icon string
 }
 
 type SubGroup struct {
