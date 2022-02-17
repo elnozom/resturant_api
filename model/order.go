@@ -28,6 +28,7 @@ type OrderItemsResp struct {
 	IsMod           bool
 	Screen          int
 	AddItems        string
+	Printed         bool
 }
 
 type PrintItemResp struct {

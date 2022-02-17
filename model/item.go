@@ -12,6 +12,7 @@ type Item struct {
 	Qnt             float32
 	MainModSerial   int
 	AddItems        string
+	Printed         bool
 }
 
 type InsertItemReq struct {
