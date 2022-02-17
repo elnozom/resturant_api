@@ -162,7 +162,7 @@ func (h *Handler) OrderListItemsBySerial(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.OrderItemsResp
-		err = rows.Scan(&item.OrderItemSerial, &item.Qnt, &item.ItemPrice, &item.ItemSerial, &item.ItemName, &item.IsMod, &item.MainModSerial, &item.AddItems)
+		err = rows.Scan(&item.OrderItemSerial, &item.Qnt, &item.ItemPrice, &item.ItemSerial, &item.ItemName, &item.IsMod, &item.MainModSerial, &item.AddItems, &item.Printed)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
