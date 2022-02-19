@@ -92,7 +92,7 @@ func (h *Handler) TablesOpenOrder(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	var resp model.TablesOpenOrderResp
-	err := h.db.Raw("EXEC TablesOpenOrder @Serial = ? , @EmpCode = ? , @Imei = ?", req.Serial, req.EmpCode, req.Imei).Row().Scan(&resp.IsOrderOpened, &resp.Msg)
+	err := h.db.Raw("EXEC TablesOpenOrder @Serial = ? , @EmpCode = ? , @Imei = ? , @HeadSerial = ?", req.Serial, req.EmpCode, req.Imei, req.HeadSerial).Row().Scan(&resp.IsOrderOpened, &resp.Msg)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
