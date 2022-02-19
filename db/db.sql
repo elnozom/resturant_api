@@ -555,7 +555,7 @@ GO
 CREATE PROCEDURE [dbo].StkTr03ListItemsBySerial (@Serial int)
 AS
 BEGIN
-	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod = 1 , 0,ISNULL(Price , 0)) ItemPrice , ItemSerial , i.ItemName ,oi.IsMod,ISNULL(oi.MainModSerial , 0) MainModSerial , ISNULL(oi.AddItems , '') AddItems , oi.Printed FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial
+	SELECT oi.Serial tr04Serial , Qnt , IIF(oi.IsMod = 1 , 0,ISNULL(Price , 0)) ItemPrice , ItemSerial , i.ItemName ,oi.IsMod,ISNULL(oi.MainModSerial , 0) MainModSerial , ISNULL(oi.AddItems , '') AddItems , oi.Printed FROM StkTr04 oi JOIN StkMs01 i ON oi.ItemSerial = i.Serial  WHERE oi.HeadSerial = @Serial ORDER BY oi.Serial
 END
 
 
