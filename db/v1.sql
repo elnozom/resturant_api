@@ -30,7 +30,7 @@ BEGIN
 		  , ISNULL(StkTr03.AccountSerial ,0) AccountSerial ,
 	   	ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) Subtotal ,
 		ISNULL(DiscountPercent , 0) DiscountPercent ,
-        ISNULL(StkTr03.ComputerName , '') ComputerName
+        ISNULL(Tables.ComputerName , '') ComputerName
 	FROM  "Tables" 
 		LEFT JOIN StkTr03 
 		ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 
