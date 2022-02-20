@@ -43,4 +43,5 @@ type Table struct {
 	DiscountPercent int
 	DiscountValue   float64
 	TotalCash       float64
+	ComputerName    string
 }

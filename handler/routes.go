@@ -23,6 +23,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	tablesG.GET("/:group", h.TablesListByGroupNo)
 	tablesG.PUT("/open", h.TablesOpenOrder)
 	tablesG.PUT("/close", h.TablesUnPause)
+	tablesG.PUT("/device/close/:imei", h.TablesCloseByImei)
 
 	// groups routes
 	groupsG := v1.Group("/group")

@@ -60,6 +60,7 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 			&table.CustomerSerial,
 			&table.Subtotal,
 			&table.DiscountPercent,
+			&table.ComputerName,
 		)
 		table.DiscountValue = float64(table.DiscountPercent) * table.Subtotal / 100
 		table.TotalCash = table.Subtotal - table.DiscountValue
@@ -115,4 +116,14 @@ func (h *Handler) TablesUnPause(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, IsTableClosed)
+}
+
+func (h *Handler) TablesCloseByImei(c echo.Context) error {
+	imei := c.Param("imei")
+	var resp bool
+	err := h.db.Raw("EXEC TablesUnpauseByImei @Imei = ?", imei).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusNoContent, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
 }
