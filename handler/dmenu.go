@@ -13,7 +13,7 @@ func (h *Handler) CreateCart(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var resp bool
+	var resp int
 	err := h.db.Raw("EXEC CartCreate @CustomerSerial = ? , @DeviceId = ? , @TableSerial = ?  ", req.CustomerSerial, req.DeviceId, req.TableSerial).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())

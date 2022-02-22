@@ -24,8 +24,9 @@ type InsertItemReq struct {
 }
 
 type OrderChangeTableReq struct {
-	NewSerial int
-	OldSerial int
+	NewSerial    int
+	OldSerial    int
+	ComputerName string
 }
 
 type OrderChangeCustomerReq struct {

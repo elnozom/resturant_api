@@ -51,7 +51,7 @@ func (h *Handler) OrderChangeTable(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	var resp bool
-	err := h.db.Raw("EXEC StkTr03ChangeTable  @NewTableSerial = ? , @OldTableSerial = ?", req.NewSerial, req.OldSerial).Row().Scan(&resp)
+	err := h.db.Raw("EXEC StkTr03ChangeTable  @NewTableSerial = ? , @OldTableSerial = ? , @CompName = ?", req.NewSerial, req.OldSerial, req.ComputerName).Row().Scan(&resp)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())

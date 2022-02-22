@@ -34,7 +34,7 @@ AS
 BEGIN
     INSERT INTO NozTrCart (CustomerSerial , DeviceId , TableSerial) VALUES (@CustomerSerial , @DeviceId , @TableSerial)
 
-    SELECT 1 AS Created
+    SELECT SCOPE_IDENTITY() AS "Serial"
 END
 
 GO

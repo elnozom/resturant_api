@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+
 	r := router.New()
 
 	r.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -21,4 +22,5 @@ func main() {
 	h := handler.NewHandler(db)
 	h.Register(v1)
 	r.Logger.Fatal(r.Start(":8588"))
+
 }
