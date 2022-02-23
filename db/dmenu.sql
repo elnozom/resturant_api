@@ -52,16 +52,16 @@ END
 GO
 EXEC DropProcIfExist @Name = "CartItemList"
 GO
-CREATE PROC CartItemList (@Serial INT)
+CREATE PROC CartItemList (@Table INT , @DeviceId VARCHAR(100))
 AS 
 BEGIN
-   SELECT ci.CartItemSerial , ci.Qnt , ISNULL(Price , 0) Price ,
+   SELECT c.CartSerial , ci.CartItemSerial , ci.Qnt , ISNULL(Price , 0) Price ,
 	 ci.ItemSerial , i.ItemName ,ci.IsMod,ISNULL(ci.MainModSerial , 0) MainModSerial
 	  , ISNULL(ci.AddItems , '') AddItems
 	   FROM NozTrCart c 
        JOIN NozTrCartItems ci ON c.CartSerial = ci.CartSerial  
        JOIN StkMs01 i ON ci.ItemSerial = i.Serial  
-	   WHERE c.CartSerial = @Serial
+	   WHERE c.TableSerial = @Table AND c.DeviceId = @DeviceId
 	   order by ci.CartItemSerial  
 END
 
@@ -73,7 +73,7 @@ CREATE PROC CartItemCreate (@CartSerial INT , @ItemSerial INT, @Price REAL )
 AS 
 BEGIN
     INSERT INTO NozTrCartItems (CartSerial,ItemSerial,Price) VALUES (@CartSerial , @ItemSerial ,@Price)
-    SELECT 1 AS Created
+    SELECT SCOPE_IDENTITY() AS "Serial"
 END
 
 

@@ -25,7 +25,7 @@ func (h *Handler) CreateCart(c echo.Context) error {
 // this function is responsible for listing cart item by a table
 func (h *Handler) ListCartItems(c echo.Context) error {
 	var items []model.CartItem
-	rows, err := h.db.Raw("EXEC CartItemList @Serial = ?", c.QueryParam("Serial")).Rows()
+	rows, err := h.db.Raw("EXEC CartItemList @Table = ? , @DeviceId = ?", c.QueryParam("Table"), c.QueryParam("Device")).Rows()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -33,6 +33,7 @@ func (h *Handler) ListCartItems(c echo.Context) error {
 	for rows.Next() {
 		var item model.CartItem
 		err = rows.Scan(
+			&item.CartSerial,
 			&item.CartItemSerial,
 			&item.Qnt,
 			&item.Price,
@@ -58,7 +59,7 @@ func (h *Handler) CreateCartItem(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	var resp bool
+	var resp int
 	err := h.db.Raw("EXEC CartItemCreate @CartSerial = ? , @ItemSerial = ? , @Price = ?", req.CartSerial, req.ItemSerial, req.Price).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())

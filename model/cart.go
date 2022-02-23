@@ -1,6 +1,7 @@
 package model
 
 type CartItem struct {
+	CartSerial     int
 	CartItemSerial int
 	Qnt            int
 	Price          float64
