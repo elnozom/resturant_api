@@ -68,6 +68,28 @@ func (h *Handler) CreateCartItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+// this function will be called when user click on call waiter or call cheque from dmenu
+func (h *Handler) CreateCartCall(c echo.Context) error {
+	var resp int
+	err := h.db.Raw("EXEC CartCallCreate @CallType = ? , @CartSerial = ?", c.Param("Type"), c.Param("Cart")).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
+// this function will be called when waiter respond to cart call waiter
+func (h *Handler) RespondCartCall(c echo.Context) error {
+	var resp bool
+	err := h.db.Raw("EXEC CartCallRespond @Serial = ? ", c.Param("Serial")).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
 // this function is responsible for creaet cart ietm
 func (h *Handler) DeleteCartItem(c echo.Context) error {
 	var resp bool

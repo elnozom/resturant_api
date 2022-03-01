@@ -38,7 +38,7 @@ func (h *Handler) OrderItemInsert(c echo.Context) error {
 func (h *Handler) OrderItemDelete(c echo.Context) error {
 
 	var resp bool
-	err := h.db.Raw("EXEC StkTr04Delete	@Serial = ?", c.Param("serial")).Row().Scan(&resp)
+	err := h.db.Raw("EXEC StkTr04Delete	@Serial = ? , @EmpCode = ?", c.Param("serial"), c.QueryParam("EmpCode")).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

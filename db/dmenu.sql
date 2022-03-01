@@ -1,5 +1,10 @@
 USE RMSS
 
+
+
+UPDATE StkMs01  SET ImagePath = CONCAT((SELECT g.GroupTypeID FROM GroupCode g WHERE g.GroupCode = StkMs01.GroupCode), '/', GroupCode, '/' , BarCode , '.jpg')
+SELECT GroupTypeID  FROM GroupType gt  
+
 IF OBJECT_ID('NozTrCart', 'U') IS NULL
 BEGIN
 CREATE TABLE NozTrCart (
@@ -23,8 +28,6 @@ CREATE TABLE NozTrCartItems (
     Price real NOT NULL
 );
 END
-
-
 
 GO
 EXEC DropProcIfExist @Name = "CartCreate"
@@ -91,7 +94,6 @@ BEGIN
 END
 
 GO
-EXEC DropProcIfExist @Name = "CartItemUpdae"
 EXEC DropProcIfExist @Name = "CartItemUpdate"
 GO
 CREATE PROC CartItemUpdate (@Serial INT , @Qnt INT)
@@ -100,6 +102,53 @@ BEGIN
     UPDATE NozTrCartItems SET Qnt = @Qnt WHERE CartItemSerial = @Serial
     SELECT 1 AS Updated
 END
+
+
+IF OBJECT_ID('NozCartCalls', 'U') IS NULL
+BEGIN
+CREATE TABLE NozCartCalls (
+    NozCartCallsSerial int IDENTITY(1,1) NOT NULL,
+    CartSerial int NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    RespondedAt DATETIME,
+    WaiterCode INT,
+    CallType bit 
+)
+END
+
+
+GO
+EXEC DropProcIfExist @Name = "CartCallCreate"
+GO
+CREATE PROC CartCallCreate (@CallType BIT , @CartSerial INT)
+AS 
+BEGIN
+    INSERT INTO NozCartCalls (CallType , CartSerial) VALUES (@CallType , @CartSerial)
+    SELECT SCOPE_IDENTITY() AS "Serial"
+END
+
+
+
+GO
+EXEC DropProcIfExist @Name = "CartCallRespond"
+GO
+CREATE PROC CartCallRespond (@Serial INT , @WaiterCode INT)
+AS 
+BEGIN
+    UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE NozCartCallsSerial = @Serial
+    SELECT 1 AS upadted
+END
+
+
+
+-- GO
+-- EXEC DropProcIfExist @Name = "CartCheckCalls"
+-- GO
+-- CREATE PROC CartCheckCalls (@EmpCode INT)
+-- AS 
+-- BEGIN
+   
+-- END
 
 ALTER TABLE StkMs01
 ADD ItemNameEn VARCHAR(100); 
@@ -111,3 +160,8 @@ ADD GroupNameEn VARCHAR(100);
 
 ALTER TABLE GroupType
 ADD GroupTypeNameEn VARCHAR(100);
+
+
+
+ALTER TABLE StkMs01
+ADD ImagePath VARCHAR(100); 
