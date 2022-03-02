@@ -5,6 +5,18 @@ USE RMSS
 UPDATE StkMs01  SET ImagePath = CONCAT((SELECT g.GroupTypeID FROM GroupCode g WHERE g.GroupCode = StkMs01.GroupCode), '/', GroupCode, '/' , BarCode , '.jpg')
 SELECT GroupTypeID  FROM GroupType gt  
 
+
+IF OBJECT_ID('NozAccGuests', 'U') IS NULL
+BEGIN
+CREATE TABLE NozAccGuests (
+    GuestSerial int IDENTITY(1,1) NOT NULL,
+    DeviceId VARCHAR(100) NOT NULL,
+    GeustName VARCHAR(100) NOT NULL,
+    GeustPhone VARCHAR(100) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+)
+END
+
 IF OBJECT_ID('NozTrCart', 'U') IS NULL
 BEGIN
 CREATE TABLE NozTrCart (
@@ -12,7 +24,8 @@ CREATE TABLE NozTrCart (
     TableSerial int NOT NULL,
     Amount real DEFAULT 0,
     CustomerSerial int DEFAULT NULL,
-    DeviceId VARCHAR(100) NOT NULL
+    DeviceId VARCHAR(100) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
 )
 END
 IF OBJECT_ID('NozTrCartItems', 'U') IS NULL
@@ -109,10 +122,11 @@ BEGIN
 CREATE TABLE NozCartCalls (
     NozCartCallsSerial int IDENTITY(1,1) NOT NULL,
     CartSerial int NOT NULL,
+    TableSerial int NOT NULL,
     CreatedAt DATETIME DEFAULT GETDATE(),
     RespondedAt DATETIME,
     WaiterCode INT,
-    CallType bit 
+    CallType SMALLINT 
 )
 END
 
@@ -120,10 +134,10 @@ END
 GO
 EXEC DropProcIfExist @Name = "CartCallCreate"
 GO
-CREATE PROC CartCallCreate (@CallType BIT , @CartSerial INT)
+CREATE PROC CartCallCreate (@CallType BIT , @CartSerial INT , @TableSerial INT)
 AS 
 BEGIN
-    INSERT INTO NozCartCalls (CallType , CartSerial) VALUES (@CallType , @CartSerial)
+    INSERT INTO NozCartCalls (CallType , CartSerial , TableSerial) VALUES (@CallType , @CartSerial ,@TableSerial)
     SELECT SCOPE_IDENTITY() AS "Serial"
 END
 
@@ -135,20 +149,55 @@ GO
 CREATE PROC CartCallRespond (@Serial INT , @WaiterCode INT)
 AS 
 BEGIN
-    UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE NozCartCallsSerial = @Serial
+    UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE CartSerial = @Serial
     SELECT 1 AS upadted
 END
 
 
 
--- GO
--- EXEC DropProcIfExist @Name = "CartCheckCalls"
--- GO
--- CREATE PROC CartCheckCalls (@EmpCode INT)
--- AS 
--- BEGIN
-   
--- END
+GO
+EXEC DropProcIfExist @Name = "CartCheckCalls"
+GO
+CREATE PROC CartCheckCalls (@EmpCode INT)
+AS 
+BEGIN
+    SELECT   g.Serial, g.GTID, g.EmpID, g.IsActive,
+    t.GroupTableNo, t.Serial TableSerial,
+    c.TableSerial, c.CallType,
+    c.CreatedAt
+    FROM     GTE_Map g INNER JOIN
+             Tables t ON g.GTID = t.GroupTableNo INNER JOIN
+             NozCartCalls c ON t.Serial = c.TableSerial
+WHERE g.EmpID = @EmpCode
+END
+
+
+
+GO
+EXEC DropProcIfExist @Name = "GuestsCreate"
+GO
+CREATE PROC GuestsCreate (
+    @DeviceId VARCHAR(100),
+    @GeustName VARCHAR(100),
+    @GeustPhone VARCHAR(100)
+)
+AS 
+BEGIN
+    INSERT INTO NozAccGuests (
+        DeviceId,
+        GeustName,
+        GeustPhone
+    ) VALUES (
+        @DeviceId,
+        @GeustName,
+        @GeustPhone
+    )
+
+    SELECT SCOPE_IDENTITY() AS "Serial"
+
+END
+
+
 
 ALTER TABLE StkMs01
 ADD ItemNameEn VARCHAR(100); 

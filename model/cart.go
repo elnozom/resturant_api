@@ -11,6 +11,11 @@ type CartItem struct {
 	MainModSerial  int
 	AddItems       string
 }
+type CartCreateCallReq struct {
+	Type        int
+	CartSerial  int
+	TableSerial int
+}
 
 type CartCreateReq struct {
 	CustomerSerial int

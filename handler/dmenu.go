@@ -58,20 +58,22 @@ func (h *Handler) CreateCartItem(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
 	var resp int
 	err := h.db.Raw("EXEC CartItemCreate @CartSerial = ? , @ItemSerial = ? , @Price = ?", req.CartSerial, req.ItemSerial, req.Price).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
 	return c.JSON(http.StatusOK, resp)
 }
 
 // this function will be called when user click on call waiter or call cheque from dmenu
 func (h *Handler) CreateCartCall(c echo.Context) error {
+	req := new(model.CartCreateCallReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 	var resp int
-	err := h.db.Raw("EXEC CartCallCreate @CallType = ? , @CartSerial = ?", c.Param("Type"), c.Param("Cart")).Row().Scan(&resp)
+	err := h.db.Raw("EXEC CartCallCreate @CallType = ? , @CartSerial = ? , @TableSerial = ? ", req.Type, req.CartSerial, req.TableSerial).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -90,10 +92,35 @@ func (h *Handler) RespondCartCall(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+// this function will be called every intercval from waiters tablets to check if there is call waiter or cheque request
+func (h *Handler) CheckCartCalls(c echo.Context) error {
+	var resp bool
+	err := h.db.Raw("EXEC CartCheckCalls @EmpCode = ? ", c.Param("EmpCode")).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}
+
 // this function is responsible for creaet cart ietm
 func (h *Handler) DeleteCartItem(c echo.Context) error {
 	var resp bool
 	err := h.db.Raw("EXEC CartItemDelete @Serial = ?", c.Param("serial")).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+// this function is responsible for creaet cart ietm
+func (h *Handler) CreateGuest(c echo.Context) error {
+	var resp int
+	req := new(model.GuestCreateReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	err := h.db.Raw("EXEC GuestsCreate @DeviceId = ? , @GeustName = ? , @GeustPhone = ?  ", req.DeviceId, req.GeustName, req.GeustPhone).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
