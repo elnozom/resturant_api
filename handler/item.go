@@ -7,6 +7,26 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func (h *Handler) ItemsListBarcodes(c echo.Context) error {
+	group := c.Param("group")
+	var items []string
+	rows, err := h.db.Raw("SELECT BarCode FROM StkMs01 WHERE GroupCode = ? ", group).Rows()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var item string
+		err = rows.Scan(&item)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
+		items = append(items, item)
+	}
+
+	return c.JSON(http.StatusOK, items)
+}
+
 // this function is responsible for listing all group tabls by calling stored procedure [GroupTablesList]
 func (h *Handler) ItemsListByGroupAndMenu(c echo.Context) error {
 	group := c.Param("group")

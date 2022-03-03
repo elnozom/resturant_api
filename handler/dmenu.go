@@ -120,8 +120,20 @@ func (h *Handler) CreateGuest(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	err := h.db.Raw("EXEC GuestsCreate @DeviceId = ? , @GeustName = ? , @GeustPhone = ?  ", req.DeviceId, req.GeustName, req.GeustPhone).Row().Scan(&resp)
+	err := h.db.Raw("EXEC GuestsCreate @DeviceId = ? , @GuestName = ? , @GuestPhone = ?  ", req.DeviceId, req.GuestName, req.GuestPhone).Row().Scan(&resp)
 	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+// this function is responsible for selcting guest name and phone by passing device id
+func (h *Handler) GetGuestByDevice(c echo.Context) error {
+	var resp model.GuestCreateReq
+	device := c.Param("device")
+	err := h.db.Raw("EXEC GuestsGetByDeivce @DeviceId = ? ", device).Row().Scan(&resp.GuestName, &resp.GuestPhone)
+	resp.DeviceId = device
+	if err != nil && err.Error() != "sql: no rows in result set" {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, resp)

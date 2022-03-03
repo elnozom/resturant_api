@@ -11,8 +11,8 @@ BEGIN
 CREATE TABLE NozAccGuests (
     GuestSerial int IDENTITY(1,1) NOT NULL,
     DeviceId VARCHAR(100) NOT NULL,
-    GeustName VARCHAR(100) NOT NULL,
-    GeustPhone VARCHAR(100) NOT NULL,
+    GuestName VARCHAR(100) NOT NULL,
+    GuestPhone VARCHAR(100) NOT NULL,
     CreatedAt DATETIME DEFAULT GETDATE()
 )
 END
@@ -178,23 +178,36 @@ EXEC DropProcIfExist @Name = "GuestsCreate"
 GO
 CREATE PROC GuestsCreate (
     @DeviceId VARCHAR(100),
-    @GeustName VARCHAR(100),
-    @GeustPhone VARCHAR(100)
+    @GuestName VARCHAR(100),
+    @GuestPhone VARCHAR(100)
 )
 AS 
 BEGIN
     INSERT INTO NozAccGuests (
         DeviceId,
-        GeustName,
-        GeustPhone
+        GuestName,
+        GuestPhone
     ) VALUES (
         @DeviceId,
-        @GeustName,
-        @GeustPhone
+        @GuestName,
+        @GuestPhone
     )
 
     SELECT SCOPE_IDENTITY() AS "Serial"
 
+END
+
+
+
+GO
+EXEC DropProcIfExist @Name = "GuestsGetByDeivce"
+GO
+CREATE PROC GuestsGetByDeivce (
+    @DeviceId VARCHAR(100)
+)
+AS 
+BEGIN
+   SELECT  GuestName, GuestPhone FROM NozAccGuests WHERE DeviceId = @DeviceId
 END
 
 

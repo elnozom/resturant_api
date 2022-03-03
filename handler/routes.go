@@ -52,6 +52,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	itemsG.GET("/:group/:tableSerial", h.ItemsListByGroupAndMenu)
 	itemsG.GET("/modifiers/:serial", h.ItemsGetModifiersBySerial)
 	itemsG.GET("/addons", h.AddonsListAll)
+	itemsG.GET("/barcodes/:group", h.ItemsListBarcodes)
 
 	// cart routes
 	cartG := v1.Group("/cart")
@@ -62,6 +63,8 @@ func (h *Handler) Register(v1 *echo.Group) {
 	cartG.POST("/call", h.CreateCartCall)
 
 	// guests rotues
-	v1.POST("/guests", h.CreateGuest)
+	guestsG := v1.Group("/guests")
+	guestsG.GET("/:device", h.GetGuestByDevice)
+	guestsG.POST("", h.CreateGuest)
 
 }
