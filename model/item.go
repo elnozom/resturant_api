@@ -5,6 +5,7 @@ type Item struct {
 	ItemPrice       float32
 	ItemCode        int
 	ItemName        string
+	ItemDesc        string
 	WithModifier    bool
 	Screen          int
 	ScreenTimes     int

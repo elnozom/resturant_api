@@ -210,7 +210,32 @@ BEGIN
    SELECT  GuestName, GuestPhone FROM NozAccGuests WHERE DeviceId = @DeviceId
 END
 
+GO
+ALTER PROCEDURE [dbo].[StkMs01ListByMenuAndGroup](@GroupCode int,@TableSerial int =0)
+AS
+BEGIN
 
+
+	DECLARE @menuSerial int
+	SELECT @menuSerial = Serial FROM Menus WHERE IsTS = 1
+	;
+	with 
+	Items (ItemSerial,ItemDesc,ItemPrice,ItemCode,ItemName,WithModifier)
+	as 
+(	SELECT im.ItemSerial ,i.ItemDesc , im.ItemPrice , i.ItemCode , i.ItemName , i.WithModifier
+	 FROM ItemMenuMap  im JOIN StkMs01 i ON im.ItemSerial = i.Serial AND i.GroupCode = @GroupCode 
+	 WHERE im.MnuSerial = @MenuSerial)
+ ,
+ 	 SalesItems (TQnt,ItemSerial) as 
+	( Select sum(Qnt) ,ItemSerial from StkTr04 inner join StkTr03 on StkTr04.HeadSerial = StkTr03.Serial 
+	where StkTr03.TableSerial = @TableSerial and isnull(StkTr03.TotalCash ,0) = 0
+	group by StkTr04.ItemSerial )
+
+	Select Items.ItemSerial,ItemPrice,ItemCode,ItemName,ItemDesc,WithModifier,isnull(SalesItems.TQnt,0) from Items
+	left join SalesItems on Items.ItemSerial = SalesItems.ItemSerial 
+
+
+END
 
 ALTER TABLE StkMs01
 ADD ItemNameEn VARCHAR(100); 

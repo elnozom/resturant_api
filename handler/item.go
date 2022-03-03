@@ -40,7 +40,7 @@ func (h *Handler) ItemsListByGroupAndMenu(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.Item
-		err = rows.Scan(&item.ItemSerial, &item.ItemPrice, &item.ItemCode, &item.ItemName, &item.WithModifier, &item.Qnt)
+		err = rows.Scan(&item.ItemSerial, &item.ItemPrice, &item.ItemCode, &item.ItemName, &item.ItemDesc, &item.WithModifier, &item.Qnt)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
