@@ -94,7 +94,7 @@ func (h *Handler) RespondCartCall(c echo.Context) error {
 
 // this function will be called every intercval from waiters tablets to check if there is call waiter or cheque request
 func (h *Handler) CheckCartCalls(c echo.Context) error {
-	var items []model.CartCreateCallReq
+	var items []model.CartCall
 	rows, err := h.db.Raw("EXEC CartCheckCalls @Imei = ? ", c.Param("Imei")).Rows()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -102,8 +102,8 @@ func (h *Handler) CheckCartCalls(c echo.Context) error {
 
 	defer rows.Close()
 	for rows.Next() {
-		var item model.CartCreateCallReq
-		err = rows.Scan(&item.CartSerial, &item.TableSerial, &item.Type)
+		var item model.CartCall
+		err = rows.Scan(&item.CartSerial, &item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.CreatedAt, &item.RespondedAt)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

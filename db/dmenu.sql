@@ -165,13 +165,16 @@ GO
 CREATE PROC CartCallCreate
     (@CallType BIT ,
     @CartSerial INT ,
-    @TableSerial INT)
+    @TableSerial INT ,
+    @GuestName VARCHAR(100)
+    )
 AS
 BEGIN
+
     INSERT INTO NozCartCalls
-        (CallType , CartSerial , TableSerial)
+        (CallType , CartSerial , TableSerial , GuestName)
     VALUES
-        (@CallType , @CartSerial , @TableSerial)
+        (@CallType , @CartSerial , @TableSerial , @GuestName)
     SELECT SCOPE_IDENTITY() AS "Serial"
 END
 
@@ -198,12 +201,14 @@ CREATE PROC CartCheckCalls
     (@Imei VARCHAR(100))
 AS
 BEGIN
-    SELECT c.CartSerial, c.TableSerial, c.CallType
-    FROM NozCartCalls c INNER JOIN
-        Tables t ON c.TableSerial = t.Serial INNER JOIN
-        GTE_Map g ON t.GroupTableNo = g.GTID INNER JOIN
-        ComUse com ON g.EmpID = com.UserId
-
+    SELECT c.CartSerial, c.TableSerial, c.CallType , c.GuestName , c.CreatedAt , ISNULL(c.RespondedAt , '') RespondedAt 
+    FROM NozCartCalls c 
+        JOIN
+            Tables t ON c.TableSerial = t.Serial 
+        JOIN
+            GTE_Map g ON t.GroupTableNo = g.GTID 
+        JOIN
+            ComUse com ON g.EmpID = com.UserId
     WHERE com.Imei = @Imei
 END
 
@@ -305,3 +310,7 @@ ADD GroupTypeNameEn VARCHAR(100);
 
 ALTER TABLE StkMs01
 ADD ImagePath VARCHAR(100); 
+
+
+ALTER TABLE NozCartCalls
+ADD GuestName VARCHAR(100); 
