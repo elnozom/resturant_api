@@ -2,9 +2,10 @@ USE RMSS
 
 
 
-UPDATE StkMs01  SET ImagePath = CONCAT((SELECT g.GroupTypeID
+UPDATE StkMs01  SET ImagePath = 
+CONCAT((SELECT g.GroupTypeID
 FROM GroupCode g
-WHERE g.GroupCode = StkMs01.GroupCode), '/', GroupCode, '/' , BarCode , '.jpg')
+WHERE g.GroupCode = StkMs01.GroupCode), '/', GroupCode, '/' , BarCode , '.jpeg')
 SELECT GroupTypeID
 FROM GroupType gt
 
@@ -184,12 +185,32 @@ GO
 EXEC DropProcIfExist @Name = "CartCallRespond"
 GO
 CREATE PROC CartCallRespond
-    (@Serial INT ,
+    (@Serials VARCHAR(100) ,
     @WaiterCode INT)
 AS
 BEGIN
-    UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE CartSerial = @Serial
-    SELECT 1 AS upadted
+    declare @CartSerial INT
+    declare I_Serial cursor
+	for
+	SELECT Split.a.value('.', 'NVARCHAR(MAX)') DATA
+    FROM
+	  (
+		 SELECT CAST('<X>'+REPLACE(@Serials, ',', '</X><X>')+'</X>' AS XML) AS String
+       ) AS A
+		CROSS APPLY String.nodes('/X') AS Split(a)
+		
+		open I_Serial
+		Fetch Next From I_Serial into @CartSerial 
+	while @@FETCH_STATUS = 0
+	begin 
+        UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE CartSerial = @Serial
+		Fetch Next From I_Serial into @CartSerial 
+    END
+    Close I_Serial
+		DEALLOCATE   I_Serial
+
+        
+
 END
 
 
@@ -201,7 +222,7 @@ CREATE PROC CartCheckCalls
     (@Imei VARCHAR(100))
 AS
 BEGIN
-    SELECT c.CartSerial, c.TableSerial, c.CallType , c.GuestName , c.CreatedAt , ISNULL(c.RespondedAt , '') RespondedAt 
+    SELECT c.CartSerial, c.TableSerial, c.CallType ,t.GroupTableNo , t.TableNo , ISNULL(c.GuestName , '') , c.CreatedAt  
     FROM NozCartCalls c 
         JOIN
             Tables t ON c.TableSerial = t.Serial 
@@ -209,7 +230,7 @@ BEGIN
             GTE_Map g ON t.GroupTableNo = g.GTID 
         JOIN
             ComUse com ON g.EmpID = com.UserId
-    WHERE com.Imei = @Imei
+    WHERE com.Imei = @Imei AND RespondedAt IS NULL
 END
 
 
@@ -260,21 +281,19 @@ END
 
 GO
 ALTER PROCEDURE [dbo].[StkMs01ListByMenuAndGroup](@GroupCode int,
-    @TableSerial int =0)
+        @TableSerial int =0)
 AS
 BEGIN
-
-
     DECLARE @menuSerial int
     SELECT @menuSerial = Serial
     FROM Menus
     WHERE IsTS = 1
     ;
     with
-        Items (ItemSerial, ItemDesc, ItemPrice, ItemCode, ItemName, WithModifier)
+        Items (ItemSerial, ItemDesc,ImagePath, ItemPrice, ItemCode, ItemName, WithModifier)
         as
         (
-            SELECT im.ItemSerial , i.ItemDesc , im.ItemPrice , i.ItemCode , i.ItemName , i.WithModifier
+            SELECT im.ItemSerial , i.ItemDesc ,i.ImagePath, im.ItemPrice , i.ItemCode , i.ItemName , i.WithModifier
             FROM ItemMenuMap  im JOIN StkMs01 i ON im.ItemSerial = i.Serial AND i.GroupCode = @GroupCode
             WHERE im.MnuSerial = @MenuSerial
         )
@@ -288,7 +307,7 @@ BEGIN
             group by StkTr04.ItemSerial
         )
 
-    Select Items.ItemSerial, ItemPrice, ItemCode, ItemName, ItemDesc, WithModifier, isnull(SalesItems.TQnt,0)
+    Select Items.ItemSerial, ItemPrice,ImagePath, ItemCode, ItemName, ItemDesc, WithModifier, isnull(SalesItems.TQnt,0)
     from Items
         left join SalesItems on Items.ItemSerial = SalesItems.ItemSerial
 

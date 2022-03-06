@@ -17,6 +17,10 @@ type CartCreateCallReq struct {
 	TableSerial int
 }
 
+type CartCallRespondReq struct {
+	Serials    string
+	WaiterCode int
+}
 type CartCall struct {
 	Type         int
 	CartSerial   int

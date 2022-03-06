@@ -6,6 +6,7 @@ type Item struct {
 	ItemCode        int
 	ItemName        string
 	ItemDesc        string
+	ImagePath       string
 	WithModifier    bool
 	Screen          int
 	ScreenTimes     int

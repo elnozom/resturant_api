@@ -83,8 +83,12 @@ func (h *Handler) CreateCartCall(c echo.Context) error {
 
 // this function will be called when waiter respond to cart call waiter
 func (h *Handler) RespondCartCall(c echo.Context) error {
+	req := new(model.CartCallRespondReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
 	var resp bool
-	err := h.db.Raw("EXEC CartCallRespond @Serial = ? ", c.Param("Serial")).Row().Scan(&resp)
+	err := h.db.Raw("EXEC CartCallRespond @Serials = ? , @WaiterCode = ?", req.Serials, req.WaiterCode).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -103,7 +107,7 @@ func (h *Handler) CheckCartCalls(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.CartCall
-		err = rows.Scan(&item.CartSerial, &item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.CreatedAt, &item.RespondedAt)
+		err = rows.Scan(&item.CartSerial, &item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.CreatedAt)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

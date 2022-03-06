@@ -62,6 +62,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	cartG.DELETE("/:serial", h.DeleteCartItem)
 	cartG.POST("/call", h.CreateCartCall)
 	cartG.GET("/call/:Imei", h.CheckCartCalls)
+	cartG.PUT("/call/respond", h.RespondCartCall)
 
 	// guests rotues
 	guestsG := v1.Group("/guests")
