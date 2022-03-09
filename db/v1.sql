@@ -63,7 +63,7 @@ CREATE PROC CartListCalls
     (@Imei VARCHAR(100))
 AS
 BEGIN
-    SELECT  c.TableSerial, c.CallType ,t.GroupTableNo , t.TableNo , ISNULL(c.GuestName , '') , gt.GroupTableName   
+    SELECT COUNT(c.CartSerial) , c.TableSerial, c.CallType ,t.GroupTableNo , t.TableNo , ISNULL(c.GuestName , '') , gt.GroupTableName   
     FROM NozCartCalls c 
         JOIN
             Tables t ON c.TableSerial = t.Serial 
@@ -122,7 +122,7 @@ BEGIN
 		Fetch Next From I_Serial into @TableSerial 
 	while @@FETCH_STATUS = 0
 	begin 
-        UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE TableSerial = @Serial
+        UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE TableSerial = @TableSerial
 		Fetch Next From I_Serial into @TableSerial 
     END
     Close I_Serial
