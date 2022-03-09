@@ -208,39 +208,6 @@ END
 
 
 
-GO
-EXEC DropProcIfExist @Name = "CartCallRespond"
-GO
-CREATE PROC CartCallRespond
-    (@Serials VARCHAR(100) ,
-    @WaiterCode INT)
-AS
-BEGIN
-    declare @TableSerial INT
-    declare I_Serial cursor
-	for
-	SELECT Split.a.value('.', 'NVARCHAR(MAX)') DATA
-    FROM
-	  (
-		 SELECT CAST('<X>'+REPLACE(@Serials, ',', '</X><X>')+'</X>' AS XML) AS String
-       ) AS A
-		CROSS APPLY String.nodes('/X') AS Split(a)
-		
-		open I_Serial
-		Fetch Next From I_Serial into @TableSerial 
-	while @@FETCH_STATUS = 0
-	begin 
-        UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE TableSerial = @Serial
-		Fetch Next From I_Serial into @TableSerial 
-    END
-    Close I_Serial
-		DEALLOCATE   I_Serial
-
-        
-
-END
-
-
 
 GO
 EXEC DropProcIfExist @Name = "CartCheckCalls"

@@ -107,7 +107,7 @@ func (h *Handler) ListCartCalls(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.CartCall
-		err = rows.Scan(&item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.GroupTableName)
+		err = rows.Scan(&item.Count, &item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.GroupTableName)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

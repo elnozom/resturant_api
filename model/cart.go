@@ -23,6 +23,7 @@ type CartCallRespondReq struct {
 	WaiterCode int
 }
 type CartCall struct {
+	Count          int
 	Type           int
 	CartSerial     int
 	TableSerial    int
