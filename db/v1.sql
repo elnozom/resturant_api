@@ -1,39 +1,103 @@
 
 
 GO
--- list order and items by item serial
--- i refers to item , oi refers to orderItem
-CREATE PROCEDURE [dbo].TablesUnpauseByImei (@Imei VARCHAR(100))
+EXEC DropProcIfExist @Name = "CartCallCreate"
+GO
+CREATE PROC CartCallCreate
+    (@CallType BIT ,
+    @CartSerial INT ,
+    @TableSerial INT ,
+    @GuestName VARCHAR(100)
+    )
 AS
 BEGIN
-	DECLARE @ComputerName VARCHAR(50)
-	SELECT @ComputerName = ComName FROM ComUse WHERE Imei = @Imei
-	UPDATE dbo.Tables SET pause = 0 , ComputerName = CASE WHEN State = 'Free' THEN NULL ELSE ComputerName END   WHERE ComputerName = @ComputerName
+    IF EXISTS (SELECT NozCartCallsSerial FROM NozCartCalls WHERE CartSerial = @CartSerial AND CallType = @CallType  AND GuestName = @GuestName AND RespondedAt IS NULL )
+    BEGIN
+        SELECT 0 AS Created
+        RETURN
+    END
+    IF @CallType = 1 AND NOT EXISTS (
+        SELECT * FROM StkTr03 o 
+            WHERE  TableSerial = @TableSerial AND 
+                    ISNULL(TotalCash,0) = 0 
+        )
+        BEGIN
+            SELECT 0 AS Created
+            RETURN
+    END
+    IF @CallType = 1 AND  EXISTS (
+        SELECT * FROM StkTr03 o 
+            JOIN  StkTr04 d 
+            ON o.Serial = d.HeadSerial
+            WHERE  TableSerial = @TableSerial AND 
+                    ISNULL(TotalCash,0) = 0  AND d.Printed = 0 
+        )
+        BEGIN
+            SELECT 0 AS Created
+            RETURN
+        END
+
+    
+    INSERT INTO NozCartCalls
+        (CallType , CartSerial , TableSerial , GuestName)
+    VALUES
+        (@CallType , @CartSerial , @TableSerial , @GuestName)
+    SELECT 1 AS Created
 END
 
 
 GO
-ALTER PROCEDURE [dbo].[TablesListByGroupNo](@GroupTableNo int)
+ALTER PROCEDURE [dbo].[GroupCodeListByGroupTypeId](@GroupTypeID int)
 AS
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
+
 	SET NOCOUNT ON;
-	DECLARE @TotalCash FLOAT
-	SELECT  Tables.Serial ,  Tables.TableNo , TableName , "pause" , "State" ,
-	 	ISNULL(StkTr03.PrintTimes , 0) PrintTimes , 
-	 	ISNULL(DocDate , '') DocDate , ISNULL(StkTr03.DocNo , '') DocNo ,
-		ISNULL(StkTr03.OrderNo , 0) OrderNo ,
-		ISNULL(StkTr03.BonNo , 0) BonNo ,
-		ISNULL(StkTr03.CustSNo , 0) Guests ,
-	  	ISNULL(StkTr03.Serial , 0) HeadSerail ,  ISNULL(StkTr03.WaiterCode ,0) WaiterCode 
-		  , ISNULL(StkTr03.AccountSerial ,0) AccountSerial ,
-	   	ISNULL((SELECT SUM(Qnt * Price) FROM  StkTr04 WHERE HeadSerial = StkTr03.Serial) ,0) Subtotal ,
-		ISNULL(DiscountPercent , 0) DiscountPercent ,
-        ISNULL(Tables.ComputerName , '') ComputerName
-	FROM  "Tables" 
-		LEFT JOIN StkTr03 
-		ON StkTr03.TableSerial = Tables.Serial AND ISNULL(TotalCash ,0) = 0 
-	
-	WHERE Tables.GroupTableNo = @GroupTableNo
+	SELECT  g.GroupCode , g.GroupName , g.ImagePath FROM  "GroupCode" g WHERE g.GroupTypeID = @GroupTypeID AND g.ShowOnMenu = 1
 END
+
+
+GO
+EXEC DropProcIfExist @Name = "CartListCalls"
+GO
+CREATE PROC CartListCalls
+    (@Imei VARCHAR(100))
+AS
+BEGIN
+    SELECT  c.TableSerial, c.CallType ,t.GroupTableNo , t.TableNo , ISNULL(c.GuestName , '') , gt.GroupTableName   
+    FROM NozCartCalls c 
+        JOIN
+            Tables t ON c.TableSerial = t.Serial 
+		JOIN
+            GroupTables gt ON gt.GroupTableNo = t.GroupTableNo 
+        JOIN
+            GTE_Map g ON t.GroupTableNo = g.GTID 
+        JOIN
+            ComUse com ON g.EmpID = com.UserId
+    WHERE com.Imei = @Imei AND RespondedAt IS NULL
+	group by c.TableSerial, c.CallType ,t.GroupTableNo , t.TableNo , c.GuestName , gt.GroupTableName   
+END
+
+
+
+GO
+EXEC DropProcIfExist @Name = "CartCheckCalls"
+GO
+CREATE PROC CartCheckCalls
+    (@Imei VARCHAR(100))
+AS
+BEGIN
+    SELECT  COUNT(*) countItems  
+    FROM NozCartCalls c 
+        JOIN
+            Tables t ON c.TableSerial = t.Serial 
+        JOIN
+            GTE_Map g ON t.GroupTableNo = g.GTID 
+        JOIN
+            ComUse com ON g.EmpID = com.UserId
+    WHERE com.Imei = @Imei AND RespondedAt IS NULL
+END
+
+
+ALTER TABLE GroupCode
+ADD ImagePath VARCHAR(100); 
+UPDATE GroupCode  SET ImagePath = CONCAT(GroupTypeID , '/' , GroupCode , '/' , 'Default.jpg')

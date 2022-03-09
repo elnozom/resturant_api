@@ -1,6 +1,7 @@
 USE RMSS
 
 
+UPDATE GroupCode  SET ImagePath = CONCAT(GroupTypeID , '/' , GroupCode , '/' , 'Default.jpg')
 
 UPDATE StkMs01  SET ImagePath = 
 CONCAT((SELECT g.GroupTypeID
@@ -171,12 +172,38 @@ CREATE PROC CartCallCreate
     )
 AS
 BEGIN
+    IF EXISTS (SELECT NozCartCallsSerial FROM NozCartCalls WHERE CartSerial = @CartSerial AND CallType = @CallType  AND GuestName = @GuestName AND RespondedAt IS NULL )
+    BEGIN
+        SELECT 0 AS Created
+        RETURN
+    END
+    IF @CallType = 1 AND NOT EXISTS (
+        SELECT * FROM StkTr03 o 
+            WHERE  TableSerial = @TableSerial AND 
+                    ISNULL(TotalCash,0) = 0 
+        )
+        BEGIN
+            SELECT 0 AS Created
+            RETURN
+    END
+    IF @CallType = 1 AND  EXISTS (
+        SELECT * FROM StkTr03 o 
+            JOIN  StkTr04 d 
+            ON o.Serial = d.HeadSerial
+            WHERE  TableSerial = @TableSerial AND 
+                    ISNULL(TotalCash,0) = 0  AND d.Printed = 0 
+        )
+        BEGIN
+            SELECT 0 AS Created
+            RETURN
+        END
 
+    
     INSERT INTO NozCartCalls
         (CallType , CartSerial , TableSerial , GuestName)
     VALUES
         (@CallType , @CartSerial , @TableSerial , @GuestName)
-    SELECT SCOPE_IDENTITY() AS "Serial"
+    SELECT 1 AS Created
 END
 
 
@@ -189,7 +216,7 @@ CREATE PROC CartCallRespond
     @WaiterCode INT)
 AS
 BEGIN
-    declare @CartSerial INT
+    declare @TableSerial INT
     declare I_Serial cursor
 	for
 	SELECT Split.a.value('.', 'NVARCHAR(MAX)') DATA
@@ -200,11 +227,11 @@ BEGIN
 		CROSS APPLY String.nodes('/X') AS Split(a)
 		
 		open I_Serial
-		Fetch Next From I_Serial into @CartSerial 
+		Fetch Next From I_Serial into @TableSerial 
 	while @@FETCH_STATUS = 0
 	begin 
-        UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE CartSerial = @Serial
-		Fetch Next From I_Serial into @CartSerial 
+        UPDATE NozCartCalls SET RespondedAt = GETDATE() ,  WaiterCode = @WaiterCode WHERE TableSerial = @Serial
+		Fetch Next From I_Serial into @TableSerial 
     END
     Close I_Serial
 		DEALLOCATE   I_Serial
@@ -314,8 +341,21 @@ BEGIN
 
 END
 
+GO
+ALTER PROCEDURE [dbo].[GroupCodeListByGroupTypeId](@GroupTypeID int)
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	SELECT  g.GroupCode , g.GroupName , g.ImagePath FROM  "GroupCode" g WHERE g.GroupTypeID = @GroupTypeID AND g.ShowOnMenu = 1
+END
+
 ALTER TABLE StkMs01
 ADD ItemNameEn VARCHAR(100); 
+
+
+ALTER TABLE GroupCode
+ADD GroupImage VARCHAR(100); 
 
 
 ALTER TABLE GroupCode
@@ -333,3 +373,4 @@ ADD ImagePath VARCHAR(100);
 
 ALTER TABLE NozCartCalls
 ADD GuestName VARCHAR(100); 
+

@@ -39,7 +39,7 @@ func (h *Handler) SubGroupsByParent(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var group model.SubGroup
-		err = rows.Scan(&group.GroupCode, &group.GroupName)
+		err = rows.Scan(&group.GroupCode, &group.GroupName, &group.ImagePath)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

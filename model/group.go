@@ -10,4 +10,5 @@ type MainGroup struct {
 type SubGroup struct {
 	GroupCode int
 	GroupName string
+	ImagePath string
 }

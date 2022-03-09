@@ -73,7 +73,7 @@ func (h *Handler) CreateCartCall(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	var resp int
-	err := h.db.Raw("EXEC CartCallCreate @CallType = ? , @CartSerial = ? , @TableSerial = ? ", req.Type, req.CartSerial, req.TableSerial).Row().Scan(&resp)
+	err := h.db.Raw("EXEC CartCallCreate @CallType = ? , @CartSerial = ? , @TableSerial = ? , @GuestName = ? ", req.Type, req.CartSerial, req.TableSerial, req.GuestName).Row().Scan(&resp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -96,10 +96,10 @@ func (h *Handler) RespondCartCall(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
-// this function will be called every intercval from waiters tablets to check if there is call waiter or cheque request
-func (h *Handler) CheckCartCalls(c echo.Context) error {
+// this function will be called if count of calls changed from the timer
+func (h *Handler) ListCartCalls(c echo.Context) error {
 	var items []model.CartCall
-	rows, err := h.db.Raw("EXEC CartCheckCalls @Imei = ? ", c.Param("Imei")).Rows()
+	rows, err := h.db.Raw("EXEC CartListCalls @Imei = ? ", c.Param("Imei")).Rows()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -107,7 +107,7 @@ func (h *Handler) CheckCartCalls(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.CartCall
-		err = rows.Scan(&item.CartSerial, &item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.CreatedAt)
+		err = rows.Scan(&item.TableSerial, &item.Type, &item.GroupTableNo, &item.TableNo, &item.GuestName, &item.GroupTableName)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -115,6 +115,17 @@ func (h *Handler) CheckCartCalls(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, items)
+}
+
+// this function will be called every intercval from waiters tablets to check if there is call waiter or cheque request
+func (h *Handler) CheckCartCalls(c echo.Context) error {
+	var resp int
+	err := h.db.Raw("EXEC CartCheckCalls @Imei = ? ", c.Param("Imei")).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
 }
 
 // this function is responsible for creaet cart ietm

@@ -15,6 +15,7 @@ type CartCreateCallReq struct {
 	Type        int
 	CartSerial  int
 	TableSerial int
+	GuestName   string
 }
 
 type CartCallRespondReq struct {
@@ -22,14 +23,15 @@ type CartCallRespondReq struct {
 	WaiterCode int
 }
 type CartCall struct {
-	Type         int
-	CartSerial   int
-	TableSerial  int
-	GuestName    string
-	CreatedAt    string
-	RespondedAt  string
-	GroupTableNo int
-	TableNo      int
+	Type           int
+	CartSerial     int
+	TableSerial    int
+	GroupTableName string
+	GuestName      string
+	CreatedAt      string
+	RespondedAt    string
+	GroupTableNo   int
+	TableNo        int
 }
 
 type CartCreateReq struct {
