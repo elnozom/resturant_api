@@ -21,6 +21,6 @@ func main() {
 
 	h := handler.NewHandler(db)
 	h.Register(v1)
-	r.Logger.Fatal(r.Start(":8588"))
+	r.Logger.Fatal(r.Start(":8589"))
 
 }
