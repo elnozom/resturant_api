@@ -5,6 +5,7 @@ import (
 	"rms/config"
 	"rms/db"
 	"rms/handler"
+	"rms/repo"
 	"rms/router"
 )
 
@@ -13,7 +14,8 @@ func main() {
 	v1 := r.Group("/api")
 	db.InitDatabase()
 	db := db.DBConn
-	h := handler.NewHandler(db)
+	groupRepo := repo.NewGroupRepo(db)
+	h := handler.NewHandler(db, groupRepo)
 	h.Register(v1)
 	port := fmt.Sprintf(":%s", config.Config("PORT"))
 	fmt.Println(port)

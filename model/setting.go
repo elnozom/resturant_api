@@ -7,12 +7,13 @@ type Setting struct {
 }
 
 type Option struct {
-	StoreCode        int
-	MultiPOS         bool
-	TransSerial      int
-	UseWaiter        bool
-	AccountSerialint int
-	SaleTax          float64
+	StoreCode     int
+	MultiPOS      bool
+	TransSerial   int
+	UseWaiter     bool
+	AccountSerial int
+	SaleTax       float64
+	MinimumBon    float64
 }
 
 type InsertDeviceReq struct {

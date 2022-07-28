@@ -5,6 +5,7 @@ type Order struct {
 	TableNo     int
 	Imei        string
 	OrderType   int
+	Guests      int
 	WaiterCode  int
 }
 
@@ -53,6 +54,8 @@ type PrintConfigResp struct {
 	DiscountValue   float64
 	SaleTax         float64
 	SubTotal        float64
+	MinimumBon      float64
+	AppliedMinimum  float64
 	TaxPercent      float64
 	Total           float64
 }

@@ -1,15 +1,21 @@
 package handler
 
-import "github.com/jinzhu/gorm"
+import (
+	"rms/repo"
+
+	"github.com/jinzhu/gorm"
+)
 
 type Handler struct {
-	db  *gorm.DB
-	tax float64
+	db        *gorm.DB
+	groupRepo repo.GroupRepo
+	tax       float64
 }
 
-func NewHandler(databaase *gorm.DB) *Handler {
+func NewHandler(databaase *gorm.DB, groupRepo repo.GroupRepo) *Handler {
 	return &Handler{
-		db:  databaase,
-		tax: 0,
+		groupRepo: groupRepo,
+		db:        databaase,
+		tax:       0,
 	}
 }

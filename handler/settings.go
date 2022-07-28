@@ -15,8 +15,9 @@ func (h *Handler) PosOptionsGet(c echo.Context) error {
 		&resp.MultiPOS,
 		&resp.TransSerial,
 		&resp.UseWaiter,
-		&resp.AccountSerialint,
+		&resp.AccountSerial,
 		&resp.SaleTax,
+		&resp.MinimumBon,
 	)
 	h.tax = resp.SaleTax
 	if err != nil {

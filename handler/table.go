@@ -19,7 +19,7 @@ func (h *Handler) GroupTablesList(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var group model.TableGroup
-		err = rows.Scan(&group.GroupTableNo, &group.GroupTableName, &group.TableCount)
+		err = rows.Scan(&group.GroupTableNo, &group.GroupTableName, &group.TableCount, &group.UseMinimumBon, &group.UseSellTax)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
@@ -60,6 +60,8 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 			&table.CustomerSerial,
 			&table.Subtotal,
 			&table.DiscountPercent,
+			&table.UseTax,
+			&table.MinimumBon,
 			&table.ComputerName,
 		)
 		table.DiscountValue = float64(table.DiscountPercent) * table.Subtotal / 100
@@ -78,6 +80,7 @@ func (h *Handler) TablesListByGroupNo(c echo.Context) error {
 		splittedDate := strings.Split(table.OpenDate, "T")
 		table.OpenDate = splittedDate[0]
 		table.OpenTime = strings.Split(splittedDate[1], ".")[0]
+		table.OpenTime = strings.Split(table.OpenTime, ":")[0] + ":" + strings.Split(table.OpenTime, ":")[1]
 		tables = append(tables, table)
 	}
 

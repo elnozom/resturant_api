@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"rms/config"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
@@ -19,11 +20,14 @@ func InitDatabase() error {
 	// DBConn, err = gorm.Open("mssql", "sqlserver://mcs:123@41.38.87.59:1433?database=stock_main")
 	DBConn, err = gorm.Open("mssql", connectionString)
 	if err != nil {
-		fmt.Println("Failed to connect to external database")
-		panic(err)
+		time.Sleep(3 * time.Minute)
+		DBConn, err = gorm.Open("mssql", connectionString)
+		if err != nil {
+			fmt.Println("Failed to connect to external database")
+			panic(err)
+		}
 	}
 	DBConn.LogMode(true)
 	fmt.Println("Connection Opened to External Database")
 	return nil
-
 }

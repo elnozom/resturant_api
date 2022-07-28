@@ -28,6 +28,9 @@ func (h *Handler) Register(v1 *echo.Group) {
 	// groups routes
 	groupsG := v1.Group("/group")
 	groupsG.GET("", h.MainGroupsList)
+	groupsG.GET("/hierarchy", h.GroupsListHierarchy)
+	groupsG.POST("", h.GroupsInsertUpdate)
+	groupsG.PUT("/:id", h.GroupsInsertUpdate)
 	groupsG.GET("/:group", h.SubGroupsByParent)
 
 	// order routes

@@ -15,7 +15,7 @@ func (h *Handler) OrderInsert(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	var resp model.OrderCreateResp
-	err := h.db.Raw("EXEC Stktr03Insert	@TableSerial = ? ,@Imei = ? ,@OrderType = ? ,@WaiterCode = ? ", req.TableSerial, req.Imei, req.OrderType, req.WaiterCode).Row().Scan(&resp.HeadSerial, &resp.DocNo)
+	err := h.db.Raw("EXEC Stktr03Insert	@TableSerial = ? ,@Imei = ? ,@OrderType = ? ,@WaiterCode = ? , @Guests = ? ", req.TableSerial, req.Imei, req.OrderType, req.WaiterCode, req.Guests).Row().Scan(&resp.HeadSerial, &resp.DocNo)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -184,14 +184,13 @@ func (h *Handler) OrderListItemsForPrint(c echo.Context) error {
 	defer rows.Close()
 	for rows.Next() {
 		var item model.PrintItemResp
-		err = rows.Scan(&resp.Config.DocDate, &resp.Config.DocTime, &resp.Config.CashtryNo, &resp.Config.CustomerName, &resp.Config.OrderNo, &resp.Config.BonNo, &item.ItemName, &resp.Config.WaiterName, &resp.Config.TableNO, &resp.Config.GroupTableName, &resp.Config.GuestsNo, &resp.Config.DiscountPercent, &resp.Config.WaiterCode, &resp.Config.SaleTax, &item.Qnt, &item.Price, &item.Total)
+		err = rows.Scan(&resp.Config.DocDate, &resp.Config.DocTime, &resp.Config.CashtryNo, &resp.Config.CustomerName, &resp.Config.OrderNo, &resp.Config.BonNo, &item.ItemName, &resp.Config.WaiterName, &resp.Config.TableNO, &resp.Config.GroupTableName, &resp.Config.GuestsNo, &resp.Config.DiscountPercent, &resp.Config.WaiterCode, &resp.Config.SaleTax, &item.Qnt, &item.Price, &item.Total, &resp.Config.MinimumBon)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 		resp.Config.SubTotal += item.Total
 		resp.Items = append(resp.Items, item)
 	}
-
 	resp.Config.DocDate = strings.Split(resp.Config.DocDate, "T")[0]
 	resp.Config.DocTime = strings.Split(resp.Config.DocTime, "T")[1]
 	resp.Config.DocTime = resp.Config.DocTime[0:5]
@@ -199,6 +198,10 @@ func (h *Handler) OrderListItemsForPrint(c echo.Context) error {
 	resp.Config.SaleTax = (h.tax * resp.Config.SubTotal) / 100
 	resp.Config.TaxPercent = h.tax
 	resp.Config.Total = (resp.Config.SubTotal + resp.Config.SaleTax) - resp.Config.DiscountValue
+	resp.Config.AppliedMinimum = (resp.Config.MinimumBon - resp.Config.Total)
+	if resp.Config.Total < resp.Config.MinimumBon {
+		resp.Config.Total = resp.Config.MinimumBon
+	}
 	return c.JSON(http.StatusOK, resp)
 }
 

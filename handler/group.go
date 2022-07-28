@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"rms/model"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,6 +26,31 @@ func (h *Handler) MainGroupsList(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, groups)
+}
+
+// this function is responsible for listing all groups hierachy
+func (h *Handler) GroupsListHierarchy(c echo.Context) error {
+	result, err := h.groupRepo.ListHierarchy()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, result)
+}
+
+func (h *Handler) GroupsInsertUpdate(c echo.Context) error {
+	codeFromUrl := c.Param("id")
+	var codeInt int
+	codeInt, _ = strconv.Atoi(codeFromUrl)
+	req := new(model.GroupInsertUpdateReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	req.GroupCode = codeInt
+	result, err := h.groupRepo.InsertUpdate(req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, result)
 }
 
 // this function is responsible for listing all groups from groupcode table by calling GroupCodeListByGroupTypeId

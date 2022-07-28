@@ -4,6 +4,8 @@ type TableGroup struct {
 	GroupTableNo   int
 	GroupTableName string
 	TableCount     int
+	UseMinimumBon  bool
+	UseSellTax     bool
 }
 
 type TablesListReq struct {
@@ -43,5 +45,7 @@ type Table struct {
 	DiscountPercent int
 	DiscountValue   float64
 	TotalCash       float64
+	UseTax          bool
+	MinimumBon      float64
 	ComputerName    string
 }
