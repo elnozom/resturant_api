@@ -46,3 +46,11 @@ func NotFound() Error {
 	e.Errors["body"] = "resource not found"
 	return e
 }
+
+func CheckErr(err *error) bool {
+	if *err != nil {
+		NewError(*err)
+		return true
+	}
+	return false
+}

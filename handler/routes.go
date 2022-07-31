@@ -6,6 +6,10 @@ import (
 
 //comment
 func (h *Handler) Register(v1 *echo.Group) {
+	v1.GET("/validate", h.ValidateUser)
+	v1.GET("/health", h.CheckHealth)
+	v1.POST("/login", h.Login)
+	v1.POST("/upload", h.Upload)
 
 	//global routes [ authinticate ]
 	v1.GET("/employee/waiters", h.EmpListWaiters)
@@ -26,12 +30,20 @@ func (h *Handler) Register(v1 *echo.Group) {
 	tablesG.PUT("/device/close/:imei", h.TablesCloseByImei)
 
 	// groups routes
-	groupsG := v1.Group("/group")
-	groupsG.GET("", h.MainGroupsList)
-	groupsG.GET("/hierarchy", h.GroupsListHierarchy)
-	groupsG.POST("", h.GroupsInsertUpdate)
-	groupsG.PUT("/:id", h.GroupsInsertUpdate)
-	groupsG.GET("/:group", h.SubGroupsByParent)
+	groupG := v1.Group("/group")
+	groupG.GET("", h.MainGroupsList)
+	groupG.GET("/hierarchy", h.GroupsListHierarchy)
+	groupG.POST("", h.GroupsEditAdd)
+	groupG.PUT("/:id", h.GroupsEditAdd)
+	groupG.GET("/:group", h.SubGroupsByParent)
+
+	// groups routes
+	groups := v1.Group("/groups")
+	groups.GET("/list", h.GroupCodeList)
+	groups.PUT("/editadd/:id", h.GroupsEditAdd)
+	groups.POST("/editadd", h.GroupsEditAdd)
+	// groups.GET("", h.groupsListAll)
+	groups.GET("/:id", h.GroupsFind)
 
 	// order routes
 	ordersG := v1.Group("/order")

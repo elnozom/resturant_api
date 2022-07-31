@@ -1,7 +1,9 @@
 package repo
 
 import (
+	"fmt"
 	"rms/model"
+	"rms/utils"
 	"strconv"
 
 	"github.com/jinzhu/gorm"
@@ -17,17 +19,56 @@ func NewGroupRepo(db *gorm.DB) GroupRepo {
 	}
 }
 
+func (ur *GroupRepo) Find(id *int) (*model.GroupHierarchy, error) {
+	var resp model.GroupHierarchy
+	err := ur.db.Raw("EXEC GroupCodeFind @groupCode = ?", id).Row().Scan(
+		&resp.GroupCode,
+		&resp.GroupName,
+		&resp.GroupNameEn,
+		&resp.Parent,
+		&resp.Code,
+	)
+	if utils.CheckErr(&err) {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (ur *GroupRepo) List(lang *string, parent *string) (*[]model.GroupListResp, error) {
+	var resp []model.GroupListResp
+	rows, err := ur.db.Raw("EXEC GroupCodeList @parentCode = ?", parent).Rows()
+	if utils.CheckErr(&err) {
+		return nil, err
+	}
+	for rows.Next() {
+		var rec model.GroupListResp
+		err := rows.Scan(&rec.GroupCode, &rec.GroupName, &rec.GroupNameEn, &rec.Code)
+		if utils.CheckErr(&err) {
+			return nil, err
+		}
+		if *lang == "ar" {
+			rec.Name = fmt.Sprintf("%s %s", rec.GroupName, rec.Code)
+		} else {
+			rec.Name = fmt.Sprintf("%s %s", rec.GroupNameEn, rec.Code)
+		}
+
+		resp = append(resp, rec)
+	}
+	return &resp, nil
+}
+
 func (ur *GroupRepo) InsertUpdate(req *model.GroupInsertUpdateReq) (*model.GroupHierarchy, error) {
 	var resp model.GroupHierarchy
-	err := ur.db.Raw("EXEC GroupCodeInsertUpdate @groupCode = ? , @groupName = ? , @groupNameEn = ? , @parentCode = ? , @code = ?",
+	err := ur.db.Raw("EXEC GroupCodeInsertUpdate @groupCode = ? , @imagePath = ? , @groupName = ? , @groupNameEn = ? , @parentCode = ?",
 		&req.GroupCode,
+		&req.ImagePath,
 		&req.GroupName,
 		&req.GroupNameEn,
 		&req.ParentCode,
-		&req.Code,
 	).Row().Scan(
+		&resp.GroupCode,
 		&resp.Name,
-		&resp.NameEn,
+		&resp.GroupNameEn,
 		&resp.Parent,
 		&resp.Code,
 	)
@@ -37,7 +78,7 @@ func (ur *GroupRepo) InsertUpdate(req *model.GroupInsertUpdateReq) (*model.Group
 	return &resp, nil
 }
 
-func (ur *GroupRepo) ListHierarchy() (*[]model.GroupHierarchy, error) {
+func (ur *GroupRepo) ListHierarchy(lang *string) (*[]model.GroupHierarchy, error) {
 	var resp []model.GroupHierarchy
 	rows, err := ur.db.Raw("EXEC GroupCodeListHierarchy").Rows()
 	if err != nil {
@@ -51,13 +92,19 @@ func (ur *GroupRepo) ListHierarchy() (*[]model.GroupHierarchy, error) {
 		var rec model.GroupHierarchy
 		err := rows.Scan(
 			&rec.GroupCode,
-			&rec.Name,
-			&rec.NameEn,
+			&rec.GroupName,
+			&rec.GroupNameEn,
 			&rec.Parent,
 			&rec.Code,
 			&rec.ChildrenLength,
 			&rec.Level,
 		)
+
+		if *lang == "ar" {
+			rec.Name = fmt.Sprintf("%s %s", rec.GroupName, rec.Code)
+		} else {
+			rec.Name = fmt.Sprintf("%s %s", rec.GroupNameEn, rec.Code)
+		}
 		rec.Children = make([]model.GroupHierarchy, 0)
 		if err != nil {
 			return nil, err

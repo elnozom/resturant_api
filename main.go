@@ -15,7 +15,8 @@ func main() {
 	db.InitDatabase()
 	db := db.DBConn
 	groupRepo := repo.NewGroupRepo(db)
-	h := handler.NewHandler(db, groupRepo)
+	userRepo := repo.NewUserRepo(db)
+	h := handler.NewHandler(db, groupRepo, userRepo)
 	h.Register(v1)
 	port := fmt.Sprintf(":%s", config.Config("PORT"))
 	fmt.Println(port)

@@ -10,9 +10,9 @@ import (
 
 func New() *echo.Echo {
 	e := echo.New()
-	fs := http.FileServer(http.Dir("images"))
+	fs := http.FileServer(http.Dir("assets"))
 
-	e.GET("/images/*", echo.WrapHandler(http.StripPrefix("/images/", fs)))
+	e.GET("/assets/*", echo.WrapHandler(http.StripPrefix("/assets/", fs)))
 	e.Logger.SetLevel(log.DEBUG)
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())

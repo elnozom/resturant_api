@@ -30,14 +30,26 @@ func (h *Handler) MainGroupsList(c echo.Context) error {
 
 // this function is responsible for listing all groups hierachy
 func (h *Handler) GroupsListHierarchy(c echo.Context) error {
-	result, err := h.groupRepo.ListHierarchy()
+	lang := c.QueryParam("lang")
+	result, err := h.groupRepo.ListHierarchy(&lang)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+
+	return c.JSON(http.StatusOK, result)
+}
+func (h *Handler) GroupCodeList(c echo.Context) error {
+	lang := c.QueryParam("lang")
+	parent := c.QueryParam("parent")
+	result, err := h.groupRepo.List(&lang, &parent)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	return c.JSON(http.StatusOK, result)
 }
 
-func (h *Handler) GroupsInsertUpdate(c echo.Context) error {
+func (h *Handler) GroupsEditAdd(c echo.Context) error {
 	codeFromUrl := c.Param("id")
 	var codeInt int
 	codeInt, _ = strconv.Atoi(codeFromUrl)
@@ -51,6 +63,15 @@ func (h *Handler) GroupsInsertUpdate(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, result)
+}
+
+func (h *Handler) GroupsFind(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	r, err := h.groupRepo.Find(&id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, r)
 }
 
 // this function is responsible for listing all groups from groupcode table by calling GroupCodeListByGroupTypeId
