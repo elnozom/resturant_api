@@ -1,0 +1,10 @@
+godady.com
+username : 43834024
+pass: Mcs&it1993
+ftp
+username :elno9680
+pass: Mcs@it1993
+
+db cart
+user : elnozom
+pass: Mcs_1993

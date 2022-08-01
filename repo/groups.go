@@ -79,7 +79,8 @@ func (ur *GroupRepo) InsertUpdate(req *model.GroupInsertUpdateReq) (*model.Group
 }
 
 func (ur *GroupRepo) ListHierarchy(lang *string) (*[]model.GroupHierarchy, error) {
-	var resp []model.GroupHierarchy
+	var resp = make([]model.GroupHierarchy, 0)
+
 	rows, err := ur.db.Raw("EXEC GroupCodeListHierarchy").Rows()
 	if err != nil {
 		return nil, err
