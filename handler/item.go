@@ -97,6 +97,20 @@ func (h *Handler) ItemsGetModifiersBySerial(c echo.Context) error {
 	return c.JSON(http.StatusOK, resp)
 }
 
+func (h *Handler) ItemsEditAdd(c echo.Context) error {
+	req := new(model.ProductEditAddReq)
+	if err := c.Bind(req); err != nil {
+		return err
+	}
+	var resp int
+	err := h.db.Raw("EXEC StkMs01InsertUpdate  @ItemCode = ?, @GroupCode = ?, @BarCode = ?, @Name = ?, @MinorPerMajor = ?, @AccountSerial = ?, @ActiveItem = ?, @ItemTypeID = ?, @ItemHaveSerial = ?, @MasterItem = ?, @StoreCode = ?, @LastBuyPrice = ?, @POSTP = ?, @POSPP = ?, @Ratio1 = ?, @Ratio2 = ? , @Disc1 = ? ,@Disc2 = ? , @PriceBefore = ? ", req.ItemCode, req.GroupCode, req.BarCode, req.Name, req.MinorPerMajor, req.AccountSerial, req.ActiveItem, req.ItemTypeID, req.ItemHaveSerial, req.MasterItem, req.StoreCode, req.LastBuyPrice, req.POSTP, req.POSPP, req.Ratio1, req.Ratio2, req.Disc1, req.Disc2, req.PriceBefore).Row().Scan(&resp)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
 // func handleModifiersResponse(items []model.Item) [][]model.Item {
 // 	var resp [][]model.Item
 

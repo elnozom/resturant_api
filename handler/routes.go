@@ -21,6 +21,11 @@ func (h *Handler) Register(v1 *echo.Group) {
 	v1.GET("/discounts", h.DiscountsListAll)
 	v1.GET("/options", h.PosOptionsGet)
 
+	// grouptables routes
+	groupTablesG := v1.Group("/groupTable")
+	groupTablesG.POST("/editadd", h.GroupTablesEditAdd)
+	groupTablesG.PUT("/editadd/:id", h.GroupTablesEditAdd)
+
 	// tables routes
 	tablesG := v1.Group("/tables")
 	tablesG.GET("/groups", h.GroupTablesList)
@@ -44,6 +49,12 @@ func (h *Handler) Register(v1 *echo.Group) {
 	groups.POST("/editadd", h.GroupsEditAdd)
 	// groups.GET("", h.groupsListAll)
 	groups.GET("/:id", h.GroupsFind)
+
+	// items routes
+	items := v1.Group("/items")
+	// items.GET("/list", h.ItemsList)
+	items.PUT("/editadd/:id", h.ItemsEditAdd)
+	items.POST("/editadd", h.ItemsEditAdd)
 
 	// order routes
 	ordersG := v1.Group("/order")

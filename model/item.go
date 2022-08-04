@@ -46,3 +46,30 @@ type InsertItemWithModifiersReq struct {
 	HeadSerial      int
 	OrderItemSerial int
 }
+
+type ProductEditAddReq struct {
+	ItemCode       string
+	GroupCode      string `json:"groupCode"`
+	SupplierCode   string
+	SupplierName   string
+	BarCode        string `json:"barCode"`
+	Name           string `json:"name"`
+	MinorPerMajor  string
+	AccountSerial  string
+	ActiveItem     bool
+	ItemTypeID     string
+	ItemHaveSerial bool
+	MasterItem     bool
+	StoreCode      string
+	LastBuyPrice   float64
+	POSTP          float64
+	POSPP          string `json:"price"`
+	Ratio1         float64
+	Ratio2         float64
+	Percent1       float64
+	Percen2        float64
+	Disc1          float64
+	Disc2          float64
+	PriceBefore    float64
+	Tax1           float64
+}

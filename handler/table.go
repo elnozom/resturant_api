@@ -29,6 +29,25 @@ func (h *Handler) GroupTablesList(c echo.Context) error {
 	return c.JSON(http.StatusOK, groups)
 }
 
+func (h *Handler) GroupTablesEditAdd(c echo.Context) error {
+	req := new(model.TableGroupEditAddtReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	var resp int
+	err := h.db.Raw("EXEC GroupTablesEditAdd  @GroupTableNo = ? , @GroupTableName = ? , @StartNo = ? , @TableCount = ?",
+		req.GroupTableNo,
+		req.GroupTableName,
+		req.StartNo,
+		req.TableCount,
+	).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
 // this function is responsible for listing all tables for desired group
 // it uses (GroupTableNo) to select tables under this specific group
 // by calling stored procedure [TablesListByGroupNo]
