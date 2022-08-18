@@ -7,12 +7,20 @@ type TableGroup struct {
 	UseMinimumBon  bool
 	UseSellTax     bool
 }
+
+type TableGroupBo struct {
+	GroupTableNo   int `json:"Id"`
+	GroupTableName string
+	StartNo        int
+	TableCount     int
+}
 type TableGroupEditAddtReq struct {
 	GroupTableNo   int
 	GroupTableName string `json:"name"`
-	StartNo        string `json:"startTable"`
-	TableCount     string `json:"tableCount"`
+	StartNo        int    `json:"startTable"`
+	TableCount     int    `json:"tableCount"`
 }
+
 type TablesListReq struct {
 	GroupTableNo int
 }

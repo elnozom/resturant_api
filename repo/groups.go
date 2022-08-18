@@ -78,6 +78,19 @@ func (ur *GroupRepo) InsertUpdate(req *model.GroupInsertUpdateReq) (*model.Group
 	return &resp, nil
 }
 
+func (ur *GroupRepo) Delete(id *int) (*int, error) {
+	var resp int
+	err := ur.db.Raw("EXEC GroupCodeDelete @groupCode = ?",
+		id,
+	).Row().Scan(
+		&resp,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 func (ur *GroupRepo) ListHierarchy(lang *string) (*[]model.GroupHierarchy, error) {
 	var resp = make([]model.GroupHierarchy, 0)
 
@@ -94,6 +107,7 @@ func (ur *GroupRepo) ListHierarchy(lang *string) (*[]model.GroupHierarchy, error
 		err := rows.Scan(
 			&rec.GroupCode,
 			&rec.GroupName,
+			&rec.ImagePath,
 			&rec.GroupNameEn,
 			&rec.Parent,
 			&rec.Code,

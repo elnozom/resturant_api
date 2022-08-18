@@ -107,3 +107,90 @@ EXEC (@InsertItemAccountQuery)
 SELECT @ItemSerial serial
 END
 
+
+
+
+
+DROP PROC IF EXISTS ItemsListBo
+
+GO
+CREATE  PROCEDURE ItemsListBo(
+	@name VARCHAR(200),
+	@groupCode INT,
+	@priceFrom REAL,
+	@priceTo REAL,
+	@dateFrom VARCHAR(200),
+	@dateTo VARCHAR(200)
+)
+AS
+BEGIN
+    SELECT i.ItemName , i.ImagePath , i.estimated_time, g.GroupName , id.POSPP , i.created_at
+        FROM StkMs01 i
+        JOIN GroupCode g ON i.GroupCode = g.GroupCode
+        JOIN StkMs02 id ON i.Serial = id.ItemSerial
+		WHERE 
+			i.ItemName LIKE CONCAT('%' , dbo.ISEMPTY(@name ,i.ItemName) , '%')
+			AND g.GroupCode = dbo.ISZERO(@groupCode , g.GroupCode)
+			AND id.POSPP >= dbo.ISZERO(@priceFrom , id.POSPP)
+			AND id.POSPP <= dbo.ISZERO(@priceTo , id.POSPP)
+
+END
+
+
+
+
+
+
+DROP PROC IF EXISTS ItemsEditAdd
+GO
+CREATE  PROCEDURE ItemsEditAdd(
+	@serial INT,
+	@name VARCHAR(200),
+	@nameEn VARCHAR(200),
+	@groupCode INT,
+	@bardCode VARCHAR(200),
+	@price real,
+	@estimatedTime INT
+)
+AS
+BEGIN
+    IF @serial = 0
+	BEGIN
+		INSERT INTO StkMs01 (
+			ItemName,
+			ItemNameEn,
+			GroupCode , 
+			BarCode ,
+			estimated_time
+		) VALUES (
+			@name,
+			@nameEn,
+			@groupCode , 
+			@bardCode ,
+			@estimatedTime
+		)
+
+		INSERT INTO StkMs02(
+			ItemSerial,
+			POSPP
+		) VALUES (
+			SCOPE_IDENTITY(),
+			@price
+		)
+	END
+	ELSE
+	BEGIN
+		UPDATE StkMs01 SET 
+			ItemNamE =  @name,
+			ItemNameEN =  @nameEn,
+			GroupCode  =  @groupCode , 
+			BarCode =  @bardCode ,
+			estimated_time =  @estimatedTime
+		WHERE Serial = @serial
+		UPDATE StkMs02 SET POSPP = @price WHERE ItemSerial = @serial
+	END
+
+	SELECT SCOPE_IDENTITY() serial
+
+END
+

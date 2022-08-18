@@ -27,6 +27,15 @@ BEGIN
 END
 
 
+DROP PROC IF EXISTS GroupCodeDelete
+GO
+CREATE  PROCEDURE GroupCodeDelete (@groupCode  INT )
+AS
+BEGIN
+    UPDATE GroupCode SET deleted_at = GETDATE() WHERE gc.GroupCode = @groupCode
+END
+
+
 
 DROP PROC IF EXISTS GroupCodeListHierarchy
 GO

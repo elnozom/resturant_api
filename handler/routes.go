@@ -23,8 +23,10 @@ func (h *Handler) Register(v1 *echo.Group) {
 
 	// grouptables routes
 	groupTablesG := v1.Group("/groupTable")
+	groupTablesG.GET("", h.GroupTablesListBo)
 	groupTablesG.POST("/editadd", h.GroupTablesEditAdd)
 	groupTablesG.PUT("/editadd/:id", h.GroupTablesEditAdd)
+	groupTablesG.GET("/:id", h.GroupTablesFind)
 
 	// tables routes
 	tablesG := v1.Group("/tables")
@@ -41,6 +43,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	groupG.POST("", h.GroupsEditAdd)
 	groupG.PUT("/:id", h.GroupsEditAdd)
 	groupG.GET("/:group", h.SubGroupsByParent)
+	groupG.DELETE("/:id", h.GroupsDelete)
 
 	// groups routes
 	groups := v1.Group("/groups")
@@ -49,12 +52,6 @@ func (h *Handler) Register(v1 *echo.Group) {
 	groups.POST("/editadd", h.GroupsEditAdd)
 	// groups.GET("", h.groupsListAll)
 	groups.GET("/:id", h.GroupsFind)
-
-	// items routes
-	items := v1.Group("/items")
-	// items.GET("/list", h.ItemsList)
-	items.PUT("/editadd/:id", h.ItemsEditAdd)
-	items.POST("/editadd", h.ItemsEditAdd)
 
 	// order routes
 	ordersG := v1.Group("/order")
@@ -95,5 +92,20 @@ func (h *Handler) Register(v1 *echo.Group) {
 	guestsG := v1.Group("/guests")
 	guestsG.GET("/:device", h.GetGuestByDevice)
 	guestsG.POST("", h.CreateGuest)
+
+	// items backoffice routes
+	// items routes
+	items := v1.Group("/items")
+	items.GET("/list", h.ItemsList)
+	items.GET("/:id", h.ItemsFind)
+	items.PUT("/editadd/:id", h.ItemsEditAdd)
+	items.POST("/editadd", h.ItemsEditAdd)
+
+	menus := v1.Group("/menus")
+	menus.GET("/list", h.MenuList)
+	menus.GET("/items", h.MenuListItems)
+	menus.GET("/:id", h.MenuFind)
+	menus.PUT("/editadd/:id", h.MenuEditAdd)
+	menus.POST("/editadd", h.MenuEditAdd)
 
 }

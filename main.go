@@ -16,7 +16,10 @@ func main() {
 	db := db.DBConn
 	groupRepo := repo.NewGroupRepo(db)
 	userRepo := repo.NewUserRepo(db)
-	h := handler.NewHandler(db, groupRepo, userRepo)
+	itemRepo := repo.NewItemRepo(db)
+	tableRepo := repo.NewTableRepo(db)
+	menuRepo := repo.NewMenuRepo(db)
+	h := handler.NewHandler(db, groupRepo, userRepo, itemRepo, tableRepo, menuRepo)
 	h.Register(v1)
 	port := fmt.Sprintf(":%s", config.Config("PORT"))
 	fmt.Println(port)

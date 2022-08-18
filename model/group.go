@@ -10,6 +10,7 @@ type GroupHierarchy struct {
 	GroupCode      int              `json:"groupCode"`
 	Name           string           `json:"name"`
 	GroupName      string           `json:"groupName"`
+	ImagePath      string           `json:"imagePath"`
 	GroupNameEn    string           `json:"groupNameEn"`
 	Parent         string           `json:"parentCode"`
 	Code           string           `json:"code"`

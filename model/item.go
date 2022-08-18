@@ -47,29 +47,36 @@ type InsertItemWithModifiersReq struct {
 	OrderItemSerial int
 }
 
+type ProductListReq struct {
+	Serial    int
+	ItemName  string  `query:"name"`
+	GroupCode string  `query:"groupCode"`
+	PriceFrom float64 `query:"priceFrom"`
+	PriceTo   float64 `query:"priceTo"`
+	DateFrom  string  `query:"dateFrom"`
+	DateTo    string  `query:"dateTo"`
+}
+
+type ProductListResp struct {
+	Id            int     `json:"Id"`
+	ItemName      string  `json:"name"`
+	ItemNameEn    string  `json:"name_en"`
+	ImagePath     string  `json:"image"`
+	Category      string  `json:"category"`
+	GroupCode     int     `json:"groupCode"`
+	BarCode       string  `json:"barCode"`
+	Price         float64 `json:"price"`
+	EstimatedTime int     `json:"estimated_time"`
+	CreatedAt     string  `json:"created_at"`
+}
+
 type ProductEditAddReq struct {
-	ItemCode       string
-	GroupCode      string `json:"groupCode"`
-	SupplierCode   string
-	SupplierName   string
-	BarCode        string `json:"barCode"`
-	Name           string `json:"name"`
-	MinorPerMajor  string
-	AccountSerial  string
-	ActiveItem     bool
-	ItemTypeID     string
-	ItemHaveSerial bool
-	MasterItem     bool
-	StoreCode      string
-	LastBuyPrice   float64
-	POSTP          float64
-	POSPP          string `json:"price"`
-	Ratio1         float64
-	Ratio2         float64
-	Percent1       float64
-	Percen2        float64
-	Disc1          float64
-	Disc2          float64
-	PriceBefore    float64
-	Tax1           float64
+	Serial        int     `json:"serial"`
+	Name          string  `json:"name"`
+	ImagePath     string  `json:"image"`
+	NameEn        string  `json:"name_en"`
+	GroupCode     int     `json:"groupCode"`
+	BarCode       string  `json:"barCode"`
+	Price         float64 `json:"price"`
+	EstimatedTime int     `json:"estimated_time"`
 }

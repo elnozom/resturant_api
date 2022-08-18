@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"rms/model"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -11,15 +12,37 @@ import (
 
 // this function is responsible for listing all group tables by calling stored procedure [GroupTablesList]
 func (h *Handler) GroupTablesList(c echo.Context) error {
-	var groups []model.TableGroup
-	rows, err := h.db.Raw("EXEC GroupTablesList @EmpCode = ?", c.QueryParam("EmpCode")).Rows()
+	groups, err := h.tableRepo.List(0)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, groups)
+}
+
+// this function is responsible for listing all group tables by calling stored procedure [GroupTablesList]
+func (h *Handler) GroupTablesFind(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	groups, err := h.tableRepo.List(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, groups[0])
+}
+
+// this function is responsible for listing all group tables by calling stored procedure [GroupTablesList]
+func (h *Handler) GroupTablesListBo(c echo.Context) error {
+	var groups []model.TableGroupBo
+	rows, err := h.db.Raw("EXEC GroupTablesList").Rows()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var group model.TableGroup
-		err = rows.Scan(&group.GroupTableNo, &group.GroupTableName, &group.TableCount, &group.UseMinimumBon, &group.UseSellTax)
+		var group model.TableGroupBo
+		err = rows.Scan(&group.GroupTableNo, &group.GroupTableName, &group.StartNo, &group.TableCount)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}

@@ -74,6 +74,15 @@ func (h *Handler) GroupsFind(c echo.Context) error {
 	return c.JSON(http.StatusOK, r)
 }
 
+func (h *Handler) GroupsDelete(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	r, err := h.groupRepo.Delete(&id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, r)
+}
+
 // this function is responsible for listing all groups from groupcode table by calling GroupCodeListByGroupTypeId
 // it uses (groupID) to select groups under this specific main group
 func (h *Handler) SubGroupsByParent(c echo.Context) error {
