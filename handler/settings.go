@@ -25,3 +25,9 @@ func (h *Handler) PosOptionsGet(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, resp)
 }
+
+// this function is responsible for listing all group tables by calling stored procedure [GroupTablesList]
+func (h *Handler) SettingsUpdate(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, "ok")
+}

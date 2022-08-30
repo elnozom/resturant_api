@@ -39,16 +39,19 @@ func (ur *MenuRepo) List() ([]model.Menu, error) {
 }
 
 func (ur *MenuRepo) ListItems(req *model.MenuItemsListReq) (*model.MenuItemsListResp, error) {
-	var inMenu []model.MenuItem
-	var outMenu []model.MenuItem
+	inMenu := make([]model.MenuItem, 0)
+	outMenu := make([]model.MenuItem, 0)
+	// var outMenu []model.MenuItem
 	rows, err := ur.db.Raw("EXEC MenuItemsList @menuId = ? , @groupCode = ?", req.MenuId, req.GroupCode).Rows()
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
+		var itemMenuMapSerial int
 		var rec model.MenuItem
 		err := rows.Scan(
+			&itemMenuMapSerial,
 			&rec.Serial,
 			&rec.Name,
 			&rec.GroupCode,
@@ -59,37 +62,64 @@ func (ur *MenuRepo) ListItems(req *model.MenuItemsListReq) (*model.MenuItemsList
 		if err != nil {
 			return nil, err
 		}
-		inMenu = append(inMenu, rec)
-	}
-	if rows.NextResultSet() {
-		for rows.Next() {
-			var rec model.MenuItem
-			err := rows.Scan(
-				&rec.Serial,
-				&rec.Name,
-				&rec.GroupCode,
-				&rec.GroupName,
-				&rec.BarCode,
-				&rec.Price,
-			)
-			if err != nil {
-				return nil, err
-			}
+		if itemMenuMapSerial == 0 {
 			outMenu = append(outMenu, rec)
+		} else {
+			rec.MenuItemSerial = itemMenuMapSerial
+			inMenu = append(inMenu, rec)
 		}
 	}
-
+	// if rows.NextResultSet() {
+	// 	for rows.Next() {
+	// 		var rec model.MenuItem
+	// 		err := rows.Scan(
+	// 			&rec.Serial,
+	// 			&rec.Name,
+	// 			&rec.GroupCode,
+	// 			&rec.GroupName,
+	// 			&rec.BarCode,
+	// 			&rec.Price,
+	// 		)
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		outMenu = append(outMenu, rec)
+	// 	}
+	// }
 	resp := model.MenuItemsListResp{Items: outMenu, MenuItems: inMenu}
 	return &resp, nil
 }
 
-func (ur *MenuRepo) EditAdd(req *model.MenuInsertReq) (*int, error) {
+func (ur *MenuRepo) EditAdd(req *model.MenuEditAddReq) (*int, error) {
 	var resp int
-	err := ur.db.Raw("EXEC MenusEditAdd  @id = ? , @name = ?, @items = ?",
-		req.Id,
-		req.Name,
-		req.Items,
-	).Row().Scan(&resp)
+	err := ur.db.Raw("EXEC MenusEditAdd  @id = ? , @name = ?", req.Id, req.Name).Row().Scan(&resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (ur *MenuRepo) Attach(req *model.MenuAttachDetachReq) (*int, error) {
+	var resp int
+	err := ur.db.Raw("EXEC MenusAttach @id =? ,  @items = ?", req.Id, req.Items).Row().Scan(&resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (ur *MenuRepo) Detach(req *model.MenuAttachDetachReq) (*int, error) {
+	var resp int
+	err := ur.db.Raw("EXEC MenusDetach   @items =?", req.Items).Row().Scan(&resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (ur *MenuRepo) PriceEdit(req *model.MenuPriceEditReq) (*int, error) {
+	var resp int
+	err := ur.db.Raw("EXEC MenusPriceEdit @id =? ,  @price = ?", req.Id, req.Price).Row().Scan(&resp)
 	if err != nil {
 		return nil, err
 	}

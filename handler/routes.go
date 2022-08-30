@@ -105,7 +105,13 @@ func (h *Handler) Register(v1 *echo.Group) {
 	menus.GET("/list", h.MenuList)
 	menus.GET("/items", h.MenuListItems)
 	menus.GET("/:id", h.MenuFind)
-	menus.PUT("/editadd/:id", h.MenuEditAdd)
+	menus.PUT("/attach/:id", h.MenuAttach)
+	menus.PUT("/detach/:id", h.MenuDetach)
+	menus.PUT("/price/edit", h.MenuPriceEdit)
 	menus.POST("/editadd", h.MenuEditAdd)
+	menus.PUT("/editadd/:id", h.MenuEditAdd)
+
+	settings := v1.Group("/settings")
+	settings.PUT("/:id", h.SettingsUpdate)
 
 }

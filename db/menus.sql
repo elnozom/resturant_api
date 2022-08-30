@@ -1,14 +1,36 @@
 
-DROP PROC IF EXISTS MenusEditAdd
+DROP PROC IF EXISTS MenusAttach
 GO
-CREATE  PROCEDURE MenusEditAdd (@name  VARCHAR(200) , @items TEXT)
+CREATE  PROCEDURE MenusAttach (@id INT , @items TEXT)
 AS
 BEGIN
-    DECLARE @menuSerial INT
+	INSERT INTO ItemMenuMap (MnuSerial , ItemSerial , ItemPrice) SELECT  @id , id , price FROM  dbo.ExtractMenuItesmFromCSV(@items , ',' , '-')
+	SELECT @id id
+END
+
+DROP PROC IF EXISTS MenusList
+GO
+CREATE  PROCEDURE MenusList 
+AS
+BEGIN
+    SELECT   Serial , Name , CreatedAt FROM Menus
+END
+
+
+DROP PROC IF EXISTS MenusEditAdd
+GO
+CREATE  PROCEDURE MenusEditAdd (@id INT , @name  VARCHAR(200))
+AS
+BEGIN
+	IF @id != 0
+        BEGIN
+            UPDATE Menus SET MnuName = @name WHERE Serial = @id
+            SELECT @id id
+            RETURN
+        END
+
 	INSERT INTO Menus (MnuName) VALUES (@name)
-	SET @menuSerial = SCOPE_IDENTITY()
-	INSERT INTO ItemMenuMap (MnuSerial , ItemSerial , ItemPrice) SELECT  @menuSerial , id , price FROM  dbo.ExtractMenuItesmFromCSV(@items , ',' , '-')
-	SELECT @menuSerial menuSerial
+    SELECT SCOPE_IDENTITY() id
 END
 
 GO
@@ -57,27 +79,57 @@ AS
         RETURN 
     END
 
-
-
 GO
 CREATE  PROC MenuItemsList(
 	@menuId INT = 0,
-	@groupCode INT
+	@groupCode INT = 0
 )
 AS
 BEGIN
-	declare @baseQuery VARCHAR(600) , @inMenuQuery VARCHAR(600) , @notInMenuQuery VARCHAR(600)
-    SET @baseQuery = '
-    SELECT i.Serial , i.ItemName ,  g.GroupCode , g.GroupName , i.BarCode , id.POSPP 
-        FROM StkMs01 i
-        JOIN GroupCode g ON i.GroupCode = g.GroupCode
-        JOIN StkMs02 id ON i.Serial = id.ItemSerial
-        LEFT JOIN ItemMenuMap im ON i.Serial = im.ItemSerial
-        WHERE  g.GroupCode = dbo.ISZERO(@groupCode , g.GroupCode) AND im.Serial 
-    '
-    SET @inMenuQuery = CONCAT(@baseQuery , '=' , @menuId)
-    SET @notInMenuQuery = CONCAT(@baseQuery , 'IS NULL')
-
-    EXEC @inMenuQuery
-    EXEC @notInMenuQuery
+		 SELECT im.Serial ,
+                i.Serial ,
+                i.ItemName ,
+                g.GroupCode ,
+                g.GroupName ,
+                i.BarCode , 
+                CASE WHEN im.Serial IS NULL 
+                    THEN  id.POSPP 
+                    ELSE im.ItemPrice 
+                END price
+            FROM StkMs01 i
+            JOIN GroupCode g ON i.GroupCode = g.GroupCode
+            JOIN StkMs02 id ON i.Serial = id.ItemSerial
+            LEFT JOIN ItemMenuMap im 
+                ON i.Serial = im.ItemSerial
+                AND im.MnuSerial =  dbo.ISZERO(@menuId , im.MnuSerial)
+            WHERE  g.GroupCode = dbo.ISZERO(@groupCode , g.GroupCode)
+	
 END
+
+
+
+
+GO
+CREATE  PROC MenusPriceEdit(
+	@id INT,
+	@price REAL
+)
+AS
+BEGIN
+		UPDATE ItemMenuMap SET ItemPrice = @price WHERE Serial = @id
+        SELECT @id id
+END
+
+
+
+GO
+CREATE  PROC MenusDelete(
+	@id INT
+)
+AS
+BEGIN
+    UPDATE Menus SET DeletedAt = GETDATE() WHERE Serial = @id
+    SELECT 1 deleted
+END
+
+

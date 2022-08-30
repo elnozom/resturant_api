@@ -7,13 +7,14 @@ type Menu struct {
 }
 
 type MenuItem struct {
-	Serial     int    `json:"Id"`
-	MenuSerial int    `json:"menuId"`
-	Name       string `json:"name"`
-	GroupCode  string `json:"groupCode"`
-	GroupName  string `json:"groupName"`
-	BarCode    string `json:"barCode"`
-	Price      string `json:"price"`
+	Serial         int    `json:"Id"`
+	MenuSerial     int    `json:"menuId"`
+	Name           string `json:"name"`
+	GroupCode      string `json:"groupCode"`
+	GroupName      string `json:"groupName"`
+	BarCode        string `json:"barCode"`
+	Price          string `json:"price"`
+	MenuItemSerial int    `json:"MenuItemId"`
 }
 
 type MenuItemsListResp struct {
@@ -26,8 +27,17 @@ type MenuItemsListReq struct {
 	GroupCode int `query:"groupCode"`
 }
 
-type MenuInsertReq struct {
+type MenuEditAddReq struct {
+	Id   int
+	Name string
+}
+
+type MenuAttachDetachReq struct {
 	Id    int
-	Name  string
-	Items string
+	Items string `json:"items"`
+}
+
+type MenuPriceEditReq struct {
+	Id    int
+	Price float64
 }

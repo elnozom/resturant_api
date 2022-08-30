@@ -11,7 +11,7 @@ import (
 func (h *Handler) MenuList(c echo.Context) error {
 	resp, err := h.menuRepo.List()
 	if err != nil {
-		return c.JSON(http.StatusOK, resp)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -22,7 +22,7 @@ func (h *Handler) MenuListItems(c echo.Context) error {
 	}
 	resp, err := h.menuRepo.ListItems(req)
 	if err != nil {
-		return c.JSON(http.StatusOK, resp)
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, resp)
 }
@@ -51,18 +51,78 @@ func (h *Handler) MenuFind(c echo.Context) error {
 }
 
 func (h *Handler) MenuEditAdd(c echo.Context) error {
-	req := new(model.MenuInsertReq)
-	if err := c.Bind(req); err != nil {
+	var err error
+	req := new(model.MenuEditAddReq)
+	if err = c.Bind(req); err != nil {
 		return err
 	}
-	id, err := strconv.Atoi(c.Param("id"))
+	var id int
+	if c.Param("id") != "" {
+		id, err = strconv.Atoi(c.Param("id"))
+	}
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "error scanning id : "+err.Error())
 	}
 	req.Id = id
 	resp, err := h.menuRepo.EditAdd(req)
 	if err != nil {
-		return c.JSON(http.StatusOK, resp)
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) MenuAttach(c echo.Context) error {
+	var err error
+	req := new(model.MenuAttachDetachReq)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+	var id int
+	if c.Param("id") != "" {
+		id, err = strconv.Atoi(c.Param("id"))
+	}
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "error scanning id : "+err.Error())
+	}
+	req.Id = id
+	resp, err := h.menuRepo.Attach(req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) MenuDetach(c echo.Context) error {
+	var err error
+	req := new(model.MenuAttachDetachReq)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+	var id int
+	if c.Param("id") != "" {
+		id, err = strconv.Atoi(c.Param("id"))
+	}
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "error scanning id : "+err.Error())
+	}
+	req.Id = id
+	resp, err := h.menuRepo.Detach(req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, resp)
+}
+
+func (h *Handler) MenuPriceEdit(c echo.Context) error {
+	var err error
+	req := new(model.MenuPriceEditReq)
+	if err = c.Bind(req); err != nil {
+		return err
+	}
+
+	resp, err := h.menuRepo.PriceEdit(req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, resp)
 }

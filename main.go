@@ -22,7 +22,6 @@ func main() {
 	h := handler.NewHandler(db, groupRepo, userRepo, itemRepo, tableRepo, menuRepo)
 	h.Register(v1)
 	port := fmt.Sprintf(":%s", config.Config("PORT"))
-	fmt.Println(port)
 	r.Logger.Fatal(r.Start(port))
 
 }
