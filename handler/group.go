@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"rms/model"
 	"strconv"
@@ -86,7 +87,11 @@ func (h *Handler) GroupsDelete(c echo.Context) error {
 // this function is responsible for listing all groups from groupcode table by calling GroupCodeListByGroupTypeId
 // it uses (groupID) to select groups under this specific main group
 func (h *Handler) SubGroupsByParent(c echo.Context) error {
-	groupID := c.Param("group")
+	groupID := c.Param("id")
+	fmt.Println("id")
+	fmt.Println(groupID)
+	fmt.Println(c.Param("group"))
+	fmt.Println(c.ParamNames())
 	var groups []model.SubGroup
 	rows, err := h.db.Raw("EXEC GroupCodeListByGroupTypeId @GroupTypeID = ?", groupID).Rows()
 	if err != nil {

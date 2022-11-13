@@ -28,4 +28,9 @@ container:
 run-container:
 	docker run --rm -it echo-realworld
 
-.PHONY: build run build-static test container
+
+
+deploy:
+	CGO_ENABLED=0 go build . && scp rms .env.prod noz:rms
+
+.PHONY: build run build-static test container deploy

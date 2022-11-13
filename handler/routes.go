@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-//comment
+// comment
 func (h *Handler) Register(v1 *echo.Group) {
 	v1.GET("/validate", h.ValidateUser)
 	v1.GET("/health", h.CheckHealth)
