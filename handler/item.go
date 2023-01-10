@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"rms/model"
 	"strconv"
@@ -26,6 +27,20 @@ func (h *Handler) ItemsListBarcodes(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, items)
+}
+
+func (h *Handler) UpdateImage(c echo.Context) error {
+	req := new(model.UpdateImageReq)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	fmt.Println(req)
+	var resp bool
+	err := h.db.Raw("EXEC UpdateImage @mainGroup = ? , @subGroup = ?  ,@product = ? , @image = ? ", req.MainGroupCode, req.SubGroupCode, req.ProductCode, req.Image).Row().Scan(&resp)
+	if err != nil {
+		return c.JSON(http.StatusNoContent, err.Error())
+	}
+	return c.JSON(http.StatusOK, req)
 }
 
 // this function is responsible for listing all group tabls by calling stored procedure [GroupTablesList]

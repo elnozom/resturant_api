@@ -17,6 +17,12 @@ type Item struct {
 	Printed         bool
 }
 
+type UpdateImageReq struct {
+	Image         string `json:"image"`
+	MainGroupCode int    `json:"mainGroupCode"`
+	ProductCode   int    `json:"productCode"`
+	SubGroupCode  int    `json:"subGroupCode"`
+}
 type InsertItemReq struct {
 	HeadSerial int
 	ItemSerial int

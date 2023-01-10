@@ -10,6 +10,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	v1.GET("/health", h.CheckHealth)
 	v1.POST("/login", h.Login)
 	v1.POST("/upload", h.Upload)
+	v1.PUT("/image", h.UpdateImage)
 
 	//global routes [ authinticate ]
 	v1.GET("/employee/waiters", h.EmpListWaiters)

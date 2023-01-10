@@ -1,36 +1,18 @@
-#@IgnoreInspection BashAddShebang
-export ROOT=$(realpath $(dir $(lastword $(MAKEFILE_LIST))))
-export DEBUG=true
-export APP=golang-echo-realworld-example-app
-export LDFLAGS="-w -s"
+pid:
+	sudo ss -lptn 'sport = :6000'
 
-all: build test
-
-build:
-	go build -race  .
-
-build-static:
-	CGO_ENABLED=0 go build -race -v -o $(APP) -a -installsuffix cgo -ldflags $(LDFLAGS) .
 
 run:
-	go run -race .
+	go run main.go
 
-############################################################
-# Test
-############################################################
-
-test:
-	go test -v -race ./...
-
-container:
-	docker build -t echo-realworld .
-
-run-container:
-	docker run --rm -it echo-realworld
+build:
+	CGO_ENABLED=0 go build .
 
 
-
+build-windows:
+	env GOOS=windows  CGO_ENABLED=0 go build .
 deploy:
-	CGO_ENABLED=0 go build . && scp rms .env.prod noz:rms
+	CGO_ENABLED=0 go build . && scp eta .env.prod noz:eta
 
-.PHONY: build run build-static test container deploy
+runbg:
+	./eta > /dev/null 2>&1 & 
